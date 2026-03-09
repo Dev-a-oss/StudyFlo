@@ -1,0 +1,745 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>StudyFlow • AI Assistant</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/lucide@latest"></script>
+<style>
+:root{
+  --primary:#818cf8;--pd:#4f46e5;--glow:rgba(129,140,248,.2);
+  --bg:#07090f;--sb:#0a0c16;--sf:#0d0f1a;
+  --card:rgba(255,255,255,.04);--cb:rgba(255,255,255,.08);--border:rgba(255,255,255,.06);
+  --txt:#eef0ff;--muted:#5a6480;--dim:#1e2440;
+  --green:#34d399;--amber:#fbbf24;--red:#f87171;
+}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+html,body{height:100%;overflow:hidden;}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--txt);display:flex;}
+body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
+  background:radial-gradient(ellipse 60% 50% at 5% 0%,rgba(79,70,229,.15) 0%,transparent 60%),
+             radial-gradient(ellipse 40% 40% at 95% 100%,rgba(109,40,217,.1) 0%,transparent 60%);}
+
+/* NAV */
+nav{width:248px;min-width:248px;background:var(--sb);border-right:1px solid var(--border);
+    display:flex;flex-direction:column;height:100vh;position:fixed;top:0;left:0;z-index:100;
+    transition:transform .28s cubic-bezier(.4,0,.2,1);}
+nav::after{content:'';position:absolute;top:0;right:0;width:1px;height:100%;
+  background:linear-gradient(to bottom,transparent,var(--glow) 40%,var(--glow) 60%,transparent);pointer-events:none;}
+.logo{font-family:'Syne',sans-serif;font-size:1.4rem;font-weight:800;letter-spacing:-.03em;
+  display:flex;align-items:center;gap:9px;padding:1.6rem 1.3rem;text-decoration:none;border-bottom:1px solid var(--border);}
+.logo i{width:20px;height:20px;color:var(--primary);filter:drop-shadow(0 0 8px var(--primary));}
+.logo-text{background:linear-gradient(110deg,#fff 20%,var(--primary));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.nav-scroll{flex:1;overflow-y:auto;padding:.7rem .65rem 1rem;}
+.nav-scroll::-webkit-scrollbar{width:2px;}
+.nav-scroll::-webkit-scrollbar-thumb{background:rgba(255,255,255,.07);}
+.nl{font-size:.59rem;font-weight:700;text-transform:uppercase;letter-spacing:.13em;color:var(--dim);padding:.8rem 12px .3rem;user-select:none;}
+.ni{display:flex;align-items:center;gap:9px;padding:9px 11px;text-decoration:none;color:var(--muted);
+  font-size:.84rem;font-weight:500;border-radius:9px;margin-bottom:1px;transition:all .15s;position:relative;}
+.ni i{width:15px;height:15px;flex-shrink:0;}
+.ni:hover{background:rgba(129,140,248,.08);color:var(--txt);}
+.ni.active{background:rgba(129,140,248,.13);color:var(--primary);}
+.ni.active::before{content:'';position:absolute;left:0;top:20%;bottom:20%;width:3px;background:var(--primary);border-radius:0 3px 3px 0;box-shadow:0 0 8px var(--primary);}
+.chip{margin-left:auto;background:rgba(129,140,248,.15);color:var(--primary);font-size:.58rem;font-weight:700;padding:2px 6px;border-radius:20px;}
+.uc{margin-left:auto;background:var(--red);color:#fff;font-size:.58rem;font-weight:800;padding:2px 7px;border-radius:20px;}
+
+/* HAMBURGER */
+.ham{display:none;position:fixed;top:13px;left:13px;z-index:200;width:40px;height:40px;
+  border-radius:10px;background:rgba(10,12,22,.95);border:1px solid var(--border);
+  color:var(--txt);align-items:center;justify-content:center;cursor:pointer;box-shadow:0 2px 16px rgba(0,0,0,.5);}
+.ham i{width:18px;height:18px;}
+.noverlay{display:none;position:fixed;inset:0;z-index:99;background:rgba(0,0,0,.6);backdrop-filter:blur(4px);}
+.noverlay.open{display:block;}
+
+/* PAGE LAYOUT */
+main{margin-left:248px;display:flex;flex-direction:column;height:100vh;width:calc(100% - 248px);position:relative;z-index:1;}
+
+/* HEADER */
+.ai-header{display:flex;align-items:center;justify-content:space-between;padding:1.1rem 1.8rem;
+  border-bottom:1px solid var(--border);background:rgba(7,9,15,.92);backdrop-filter:blur(20px);flex-shrink:0;}
+.ai-header-left{display:flex;align-items:center;gap:.85rem;}
+.ai-avatar{width:42px;height:42px;border-radius:13px;background:linear-gradient(135deg,var(--pd),#6d28d9);
+  display:flex;align-items:center;justify-content:center;position:relative;flex-shrink:0;
+  box-shadow:0 0 20px rgba(79,70,229,.35);}
+.ai-avatar i{width:20px;height:20px;color:white;}
+.ai-status-ring{position:absolute;bottom:-2px;right:-2px;width:12px;height:12px;border-radius:50%;
+  background:var(--green);border:2px solid var(--bg);animation:pulse-green 2s ease-in-out infinite;}
+@keyframes pulse-green{0%,100%{opacity:1}50%{opacity:.4}}
+.ai-info h2{font-family:'Syne',sans-serif;font-size:1rem;font-weight:800;}
+.ai-info p{font-size:.72rem;color:var(--muted);margin-top:.1rem;}
+.ai-header-right{display:flex;gap:.5rem;}
+.hbtn{width:36px;height:36px;border-radius:10px;background:var(--card);border:1px solid var(--cb);
+  color:var(--muted);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .18s;}
+.hbtn:hover{background:rgba(129,140,248,.12);color:var(--primary);border-color:rgba(129,140,248,.25);}
+.hbtn i{width:15px;height:15px;}
+
+/* SUBJECT SELECTOR */
+.subject-bar{display:flex;align-items:center;gap:.5rem;padding:.75rem 1.8rem;border-bottom:1px solid var(--border);
+  background:rgba(7,9,15,.6);overflow-x:auto;flex-shrink:0;}
+.subject-bar::-webkit-scrollbar{height:2px;}
+.sbj{padding:.38rem .9rem;border-radius:20px;border:1px solid var(--border);background:transparent;
+  color:var(--muted);font-size:.75rem;font-weight:600;cursor:pointer;white-space:nowrap;
+  font-family:'DM Sans',sans-serif;transition:all .15s;flex-shrink:0;}
+.sbj.active{background:var(--pd);border-color:var(--pd);color:white;}
+.sbj:hover:not(.active){background:rgba(129,140,248,.08);color:var(--txt);}
+
+/* MESSAGES */
+.msgs{flex:1;overflow-y:auto;padding:1.5rem 1.8rem;display:flex;flex-direction:column;gap:.85rem;}
+.msgs::-webkit-scrollbar{width:4px;}
+.msgs::-webkit-scrollbar-thumb{background:rgba(255,255,255,.07);border-radius:4px;}
+
+/* SUGGESTIONS (shown when empty) */
+.suggestions-wrap{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:2rem;gap:1.2rem;}
+.ai-welcome{text-align:center;}
+.ai-welcome-ico{width:70px;height:70px;border-radius:22px;background:linear-gradient(135deg,var(--pd),#6d28d9);
+  display:flex;align-items:center;justify-content:center;margin:0 auto 1rem;
+  box-shadow:0 0 40px rgba(79,70,229,.3);}
+.ai-welcome-ico i{width:32px;height:32px;color:white;}
+.ai-welcome h2{font-family:'Syne',sans-serif;font-size:1.3rem;font-weight:800;margin-bottom:.35rem;}
+.ai-welcome p{font-size:.85rem;color:var(--muted);line-height:1.65;max-width:380px;}
+.suggestions-grid{display:grid;grid-template-columns:1fr 1fr;gap:.6rem;width:100%;max-width:560px;}
+.suggestion-btn{display:flex;align-items:flex-start;gap:.7rem;padding:.85rem 1rem;border-radius:13px;
+  background:var(--card);border:1px solid var(--cb);cursor:pointer;text-align:left;
+  transition:all .2s;font-family:'DM Sans',sans-serif;}
+.suggestion-btn:hover{background:rgba(129,140,248,.08);border-color:rgba(129,140,248,.25);transform:translateY(-1px);}
+.suggestion-btn .sb-ico{width:30px;height:30px;border-radius:9px;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:1rem;}
+.suggestion-btn .sb-txt{font-size:.8rem;font-weight:500;color:var(--txt);line-height:1.4;}
+.suggestion-btn .sb-tag{font-size:.68rem;color:var(--muted);margin-top:.15rem;}
+
+/* BUBBLES */
+.msg-row{display:flex;gap:.75rem;align-items:flex-end;max-width:780px;animation:fadeUp .2s ease both;}
+.msg-row.user{flex-direction:row-reverse;margin-left:auto;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+.bav{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;overflow:hidden;}
+.bav.ai{background:linear-gradient(135deg,var(--pd),#6d28d9);}
+.bav.ai i{width:15px;height:15px;color:white;}
+.bav.user{background:linear-gradient(135deg,#1e40af,#3730a3);font-family:'Syne',sans-serif;font-size:.78rem;font-weight:800;color:white;}
+.bav img{width:100%;height:100%;object-fit:cover;}
+.bcol{display:flex;flex-direction:column;gap:.35rem;max-width:100%;}
+.bubble{padding:.7rem 1rem;border-radius:18px;font-size:.875rem;line-height:1.6;word-break:break-word;position:relative;}
+.msg-row.ai .bubble{background:var(--card);border:1px solid var(--cb);border-bottom-left-radius:4px;color:var(--txt);}
+.msg-row.user .bubble{background:linear-gradient(135deg,var(--pd),#6d28d9);color:white;border-bottom-right-radius:4px;box-shadow:0 2px 12px rgba(79,70,229,.3);}
+.bubble pre{background:rgba(0,0,0,.4);border:1px solid rgba(255,255,255,.1);border-radius:8px;
+  padding:.7rem;overflow-x:auto;font-size:.78rem;margin:.5rem 0;font-family:'DM Mono',monospace;}
+.bubble code{background:rgba(0,0,0,.3);border-radius:4px;padding:.1rem .35rem;font-size:.8em;font-family:'DM Mono',monospace;}
+.bubble ul,.bubble ol{padding-left:1.2rem;margin:.35rem 0;}
+.bubble li{margin:.2rem 0;}
+.bubble strong{font-weight:700;}
+.bubble p{margin:.25rem 0;}
+.bubble p:first-child{margin-top:0;}
+.bubble p:last-child{margin-bottom:0;}
+.bmeta{font-size:.62rem;color:var(--muted);padding:0 .25rem;}
+.msg-row.user .bmeta{text-align:right;}
+.copy-btn{display:inline-flex;align-items:center;gap:4px;margin-top:.35rem;padding:.3rem .65rem;
+  border-radius:7px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);
+  color:var(--muted);font-size:.68rem;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;
+  transition:all .15s;}
+.copy-btn:hover{background:rgba(129,140,248,.12);color:var(--primary);}
+.copy-btn i{width:11px;height:11px;}
+
+/* TYPING INDICATOR */
+.typing-bubble{display:flex;gap:4px;align-items:center;padding:.7rem 1rem;background:var(--card);border:1px solid var(--cb);border-radius:18px;border-bottom-left-radius:4px;width:fit-content;}
+.td{width:7px;height:7px;border-radius:50%;background:var(--primary);animation:td 1.2s ease-in-out infinite;}
+.td:nth-child(2){animation-delay:.2s;}.td:nth-child(3){animation-delay:.4s;}
+@keyframes td{0%,80%,100%{transform:scale(.6);opacity:.3}40%{transform:scale(1);opacity:1}}
+
+/* INPUT BAR */
+.input-section{border-top:1px solid var(--border);background:rgba(7,9,15,.95);backdrop-filter:blur(20px);flex-shrink:0;}
+.char-warning{text-align:right;padding:.4rem 1.8rem 0;font-size:.68rem;color:var(--amber);display:none;}
+.input-wrap{display:flex;align-items:flex-end;gap:.6rem;padding:.85rem 1.8rem;}
+.ai-textarea{flex:1;min-height:48px;max-height:160px;background:rgba(255,255,255,.06);
+  border:1px solid rgba(255,255,255,.1);border-radius:14px;padding:.75rem 1rem;
+  font-family:'DM Sans',sans-serif;font-size:.9rem;color:var(--txt);outline:none;resize:none;
+  line-height:1.55;caret-color:var(--primary);transition:border-color .2s,box-shadow .2s;}
+.ai-textarea:focus{border-color:rgba(129,140,248,.45);box-shadow:0 0 0 3px rgba(129,140,248,.1);}
+.ai-textarea::placeholder{color:var(--muted);}
+.send-btn{width:48px;height:48px;border-radius:14px;border:none;
+  background:linear-gradient(135deg,var(--pd),#6d28d9);color:white;
+  display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;
+  transition:all .18s;box-shadow:0 2px 12px rgba(79,70,229,.35);}
+.send-btn:hover:not(:disabled){transform:translateY(-1px);box-shadow:0 5px 20px rgba(79,70,229,.5);}
+.send-btn:disabled{opacity:.35;cursor:not-allowed;}
+.send-btn i{width:18px;height:18px;}
+.input-footer{display:flex;align-items:center;justify-content:space-between;padding:0 1.8rem .7rem;}
+.input-hint{font-size:.67rem;color:var(--dim);display:flex;align-items:center;gap:.3rem;}
+.input-hint i{width:10px;height:10px;}
+.model-tag{font-size:.67rem;color:var(--muted);background:rgba(129,140,248,.08);border:1px solid rgba(129,140,248,.15);padding:2px 7px;border-radius:10px;}
+
+/* TOAST */
+.toast{position:fixed;bottom:1.5rem;right:1.5rem;z-index:500;background:#0f1120;
+  border:1px solid rgba(52,211,153,.3);color:var(--green);padding:.6rem 1.1rem;
+  border-radius:11px;font-size:.8rem;font-weight:600;display:none;
+  animation:toastIn .2s ease;box-shadow:0 8px 30px rgba(0,0,0,.4);}
+.toast.err{border-color:rgba(248,113,113,.3);color:var(--red);}
+@keyframes toastIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+/* ── USAGE LIMIT BAR ── */
+.limit-bar{
+  display:flex;align-items:center;gap:.7rem;
+  padding:.55rem 1.8rem;border-bottom:1px solid var(--border);
+  background:rgba(7,9,15,.6);flex-shrink:0;
+}
+.limit-label{font-size:.7rem;color:var(--muted);white-space:nowrap;}
+.limit-track{flex:1;height:5px;border-radius:3px;background:rgba(255,255,255,.07);overflow:hidden;max-width:180px;}
+.limit-fill{height:100%;border-radius:3px;transition:width .4s ease,background .4s ease;
+  background:linear-gradient(90deg,var(--pd),var(--primary));}
+.limit-fill.warn{background:linear-gradient(90deg,#d97706,var(--amber));}
+.limit-fill.full{background:linear-gradient(90deg,#b91c1c,var(--red));}
+.limit-count{font-size:.7rem;font-weight:700;color:var(--primary);white-space:nowrap;min-width:52px;}
+.limit-count.warn{color:var(--amber);}
+.limit-count.full{color:var(--red);}
+.limit-upgrade{display:flex;align-items:center;gap:4px;padding:.28rem .7rem;border-radius:20px;
+  background:linear-gradient(135deg,var(--pd),#7c3aed);color:white;text-decoration:none;
+  font-family:'Syne',sans-serif;font-size:.65rem;font-weight:700;white-space:nowrap;
+  transition:all .16s;box-shadow:0 2px 10px rgba(79,70,229,.3);}
+.limit-upgrade:hover{transform:translateY(-1px);box-shadow:0 4px 16px rgba(79,70,229,.45);}
+.limit-upgrade i{width:10px;height:10px;}
+/* Premium badge in limit bar */
+.prem-badge{display:flex;align-items:center;gap:5px;font-size:.7rem;font-weight:700;color:var(--amber);}
+.prem-badge i{width:12px;height:12px;}
+
+/* ── PAYWALL WALL (shown when limit hit) ── */
+.paywall{
+  display:none;flex-direction:column;align-items:center;justify-content:center;
+  padding:3rem 2rem;text-align:center;gap:1rem;flex:1;
+}
+.paywall.show{display:flex;}
+.paywall-ring{
+  width:80px;height:80px;border-radius:24px;
+  background:linear-gradient(135deg,rgba(248,113,113,.15),rgba(251,191,36,.1));
+  border:1px solid rgba(248,113,113,.25);
+  display:flex;align-items:center;justify-content:center;margin-bottom:.5rem;
+  animation:pwPulse 2s ease-in-out infinite;
+}
+@keyframes pwPulse{0%,100%{box-shadow:0 0 0 0 rgba(248,113,113,.2)}50%{box-shadow:0 0 0 14px rgba(248,113,113,0)}}
+.paywall-ring i{width:36px;height:36px;color:var(--red);}
+.paywall h2{font-family:'Syne',sans-serif;font-size:1.4rem;font-weight:800;letter-spacing:-.02em;}
+.paywall p{font-size:.88rem;color:var(--muted);max-width:360px;line-height:1.7;}
+.paywall-timer{font-size:.78rem;color:var(--muted);background:rgba(255,255,255,.04);
+  border:1px solid var(--border);border-radius:10px;padding:.4rem 1rem;margin-top:.25rem;}
+.paywall-timer span{color:var(--txt);font-weight:700;font-family:'Syne',sans-serif;}
+.pw-btns{display:flex;gap:.7rem;flex-wrap:wrap;justify-content:center;margin-top:.5rem;}
+.pw-upgrade{display:flex;align-items:center;gap:7px;padding:.75rem 1.8rem;border-radius:13px;
+  background:linear-gradient(135deg,var(--pd),#7c3aed);color:white;text-decoration:none;
+  font-family:'Syne',sans-serif;font-size:.9rem;font-weight:800;
+  box-shadow:0 6px 24px rgba(79,70,229,.4);transition:all .2s;}
+.pw-upgrade:hover{transform:translateY(-2px);box-shadow:0 10px 32px rgba(79,70,229,.55);}
+.pw-upgrade i{width:16px;height:16px;}
+.pw-wait{display:flex;align-items:center;gap:7px;padding:.75rem 1.8rem;border-radius:13px;
+  background:rgba(255,255,255,.05);border:1px solid var(--border);color:var(--muted);
+  font-family:'DM Sans',sans-serif;font-size:.88rem;font-weight:500;cursor:default;}
+.pw-wait i{width:15px;height:15px;}
+/* What you get with premium list */
+.pw-perks{display:flex;flex-direction:column;gap:.5rem;text-align:left;margin-top:.25rem;}
+.pw-perk{display:flex;align-items:center;gap:.6rem;font-size:.82rem;color:var(--muted);}
+.pw-perk i{width:14px;height:14px;color:var(--green);flex-shrink:0;}
+
+
+/* RESPONSIVE */
+@media(max-width:1024px){nav{width:220px;}main{margin-left:220px;width:calc(100% - 220px);}}
+@media(max-width:768px){
+  .ham{display:flex;}nav{transform:translateX(-100%);box-shadow:4px 0 40px rgba(0,0,0,.6);}
+  nav.open{transform:translateX(0);}main{margin-left:0;width:100%;}
+  .ai-header{padding:.9rem 1rem;}.msgs{padding:1rem;}.input-wrap{padding:.75rem 1rem;}
+  .input-footer{padding:0 1rem .6rem;}
+  .suggestions-grid{grid-template-columns:1fr;}
+  .subject-bar{padding:.65rem 1rem;}
+}
+</style>
+</head>
+<body>
+
+<button class="ham" id="ham"><i data-lucide="menu"></i></button>
+<div class="noverlay" id="noverlay"></div>
+
+<nav id="sidebar">
+  <a href="index.html" class="logo"><i data-lucide="zap"></i><span class="logo-text">StudyFlow</span></a>
+  <div class="nav-scroll">
+    <div class="nl">Main</div>
+    <a href="index.html"     class="ni"><i data-lucide="layout-dashboard"></i>Dashboard</a>
+    <a href="resources.html" class="ni"><i data-lucide="book-open"></i>Resources</a>
+    <a href="upload.html"    class="ni"><i data-lucide="upload"></i>Upload</a>
+    <a href="community.html" class="ni"><i data-lucide="users"></i>Community</a>
+    <div class="nl">Connect</div>
+    <a href="chat.html"      class="ni"><i data-lucide="message-circle"></i>Group Chat</a>
+    <a href="dm.html"        class="ni"><i data-lucide="message-square"></i>Messages</a>
+    <a href="assistant.html" class="ni active"><i data-lucide="bot"></i>AI Assistant<span class="chip">AI</span></a>
+    <div class="nl">Account</div>
+    <a href="profile.html"   class="ni"><i data-lucide="user"></i>My Profile</a>
+    <a href="premium.html"   class="ni"><i data-lucide="crown"></i>Go Premium<span class="chip">✨</span></a>
+    <a href="settings.html"  class="ni"><i data-lucide="settings"></i>Settings</a>
+    <div class="nl">Help</div>
+    <a href="faq.html"       class="ni"><i data-lucide="help-circle"></i>FAQ</a>
+    <a href="terms.html"     class="ni"><i data-lucide="file-text"></i>Terms</a>
+  </div>
+</nav>
+
+<main>
+  <!-- HEADER -->
+  <div class="ai-header">
+    <div class="ai-header-left">
+      <div class="ai-avatar">
+        <i data-lucide="bot"></i>
+        <div class="ai-status-ring"></div>
+      </div>
+      <div class="ai-info">
+        <h2>StudyFlow AI</h2>
+        <p>Powered by Llama 3.3 · Always ready to help</p>
+      </div>
+    </div>
+    <div class="ai-header-right">
+      <div class="hbtn" id="clearBtn" title="Clear conversation"><i data-lucide="trash-2"></i></div>
+      <div class="hbtn" id="copyAllBtn" title="Copy conversation"><i data-lucide="copy"></i></div>
+    </div>
+  </div>
+
+  <!-- SUBJECT TABS -->
+  <div class="subject-bar">
+    <span style="font-size:.72rem;color:var(--muted);white-space:nowrap;flex-shrink:0;">Mode:</span>
+    <button class="sbj active" data-mode="general">💬 General</button>
+    <button class="sbj" data-mode="math">📐 Math</button>
+    <button class="sbj" data-mode="science">🔬 Science</button>
+    <button class="sbj" data-mode="english">📚 English</button>
+    <button class="sbj" data-mode="history">🏛️ History</button>
+    <button class="sbj" data-mode="code">💻 Coding</button>
+    <button class="sbj" data-mode="essay">✍️ Essay Help</button>
+    <button class="sbj" data-mode="quiz">🧠 Quiz Me</button>
+  </div>
+
+  <!-- LIMIT BAR -->
+  <div class="limit-bar" id="limitBar" style="display:none;">
+    <span class="limit-label">Daily AI messages:</span>
+    <div class="limit-track"><div class="limit-fill" id="limitFill" style="width:0%"></div></div>
+    <span class="limit-count" id="limitCount">0 / 20</span>
+    <a href="premium.html" class="limit-upgrade" id="limitUpgradeBtn"><i data-lucide="crown"></i>Go Premium</a>
+  </div>
+
+  <!-- MESSAGES / SUGGESTIONS -->
+  <div id="suggestionsWrap" class="suggestions-wrap">
+    <div class="ai-welcome">
+      <div class="ai-welcome-ico"><i data-lucide="sparkles"></i></div>
+      <h2>Hey! I'm your StudyFlow AI ✨</h2>
+      <p>Ask me anything — homework help, essay feedback, math problems, code debugging, or just to quiz yourself. Pick a subject or dive right in!</p>
+    </div>
+    <div class="suggestions-grid" id="suggestionsGrid"></div>
+  </div>
+
+  <div class="msgs" id="msgs" style="display:none;"></div>
+
+  <!-- PAYWALL (shown when free limit hit) -->
+  <div class="paywall" id="paywall">
+    <div class="paywall-ring"><i data-lucide="lock"></i></div>
+    <h2>You've hit today's limit 🔒</h2>
+    <p>Free users get <strong>20 AI messages per day</strong>. Upgrade to Premium for unlimited access, faster responses, and priority support.</p>
+    <div class="paywall-timer">Resets in <span id="resetTimer">—</span></div>
+    <div class="pw-perks">
+      <div class="pw-perk"><i data-lucide="infinity"></i>Unlimited AI messages every day</div>
+      <div class="pw-perk"><i data-lucide="zap"></i>Priority responses &amp; no wait times</div>
+      <div class="pw-perk"><i data-lucide="crown"></i>VIP badge across the platform</div>
+      <div class="pw-perk"><i data-lucide="star"></i>Support StudyFlow's development</div>
+    </div>
+    <div class="pw-btns">
+      <a href="premium.html" class="pw-upgrade"><i data-lucide="crown"></i>Upgrade to Premium</a>
+      <div class="pw-wait"><i data-lucide="clock"></i>Wait for reset</div>
+    </div>
+  </div>
+
+  <!-- INPUT -->
+  <div class="input-section">
+    <div class="char-warning" id="charWarn">⚠️ Message is getting long</div>
+    <div class="input-wrap">
+      <textarea class="ai-textarea" id="aiInput" placeholder="Ask anything… e.g. Explain photosynthesis simply" rows="1" maxlength="4000"></textarea>
+      <button class="send-btn" id="sendBtn" disabled><i data-lucide="send"></i></button>
+    </div>
+    <div class="input-footer">
+      <div class="input-hint"><i data-lucide="corner-down-left"></i>Enter to send · Shift+Enter for new line</div>
+      <div class="model-tag">llama-3.3-70b-versatile</div>
+    </div>
+  </div>
+</main>
+
+<div class="toast" id="toast"></div>
+
+<!-- ═══════════════════════════════════════════════
+     FIREBASE AUTH + AI LOGIC
+═══════════════════════════════════════════════ -->
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+import { getFirestore, doc, getDoc, updateDoc, setDoc, serverTimestamp, increment } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+const FB={apiKey:"AIzaSyA-4YyVROZz-OIAGTWhpMMpuJe2Xag9Fig",authDomain:"vibe-jolt.firebaseapp.com",projectId:"vibe-jolt",storageBucket:"vibe-jolt.appspot.com",messagingSenderId:"386156754842",appId:"1:386156754842:web:8b5e45a3c7f20ac9616c23"};
+const app=initializeApp(FB);
+const auth=getAuth(app);
+const db=getFirestore(app);
+const G=id=>document.getElementById(id);
+
+const GROQ_KEY="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";
+const GROQ_URL="https://api.groq.com/openai/v1/chat/completions";
+const MODEL="llama-3.3-70b-versatile";
+const FREE_LIMIT=20; // messages per day for free users
+const PREMIUM_LIMIT=999999;
+
+// State
+let history=[];
+let currentMode="general";
+let userPhoto="",userName="",userInit="S";
+let loading=false;
+let isPremium=false;
+let todayUsage=0;
+let dailyLimit=FREE_LIMIT;
+let resetTimerInt=null;
+
+// Subject system prompts
+const MODES={
+  general:{label:"General",icon:"💬",system:"You are StudyFlow AI, a helpful, friendly study assistant for students. Be concise, encouraging, and clear. Use emojis where appropriate. Format answers with markdown when helpful."},
+  math:{label:"Math",icon:"📐",system:"You are a math tutor. Walk through problems step-by-step. Show workings clearly. Use plain text equations like 2x + 3 = 7. Be patient and thorough. Always check your arithmetic."},
+  science:{label:"Science",icon:"🔬",system:"You are a science tutor covering biology, chemistry, physics, and earth science. Give accurate explanations, use real-world examples, and explain concepts at a high school level unless asked otherwise."},
+  english:{label:"English",icon:"📚",system:"You are an English and literature tutor. Help with reading comprehension, grammar, writing style, literary analysis, and vocabulary. Give specific, actionable feedback. Be encouraging."},
+  history:{label:"History",icon:"🏛️",system:"You are a history tutor. Provide context, causes, effects, and significance of historical events. Be factual, nuanced, and help students understand the bigger picture."},
+  code:{label:"Coding",icon:"💻",system:"You are a coding tutor. Help debug code, explain programming concepts, and write clean, commented code. Always use code blocks. Support Python, JavaScript, HTML/CSS, and other common languages."},
+  essay:{label:"Essay Help",icon:"✍️",system:"You are an expert writing tutor. Help with essay structure, thesis statements, arguments, transitions, conclusions, and style. Give constructive feedback. Provide examples. Do not write the essay for the student — guide them to write it themselves."},
+  quiz:{label:"Quiz Mode",icon:"🧠",system:"You are a quiz master. Generate multiple choice or short answer questions on whatever topic the student gives you. After they answer, give immediate feedback. Keep score and be encouraging."}
+};
+
+// Suggestions per mode
+const SUGGESTIONS={
+  general:[
+    {icon:"💡",txt:"Explain something",tag:"Any topic",q:"Can you explain how the internet works in simple terms?"},
+    {icon:"📝",txt:"Help me summarize",tag:"Notes & studying",q:"Help me summarize my notes on World War II"},
+    {icon:"🗂️",txt:"Make a study plan",tag:"Productivity",q:"Make me a 2-week study plan for my biology exam"},
+    {icon:"🤔",txt:"I need help with...",tag:"Anything",q:"I need help understanding fractions"}
+  ],
+  math:[
+    {icon:"🔢",txt:"Solve an equation",tag:"Algebra",q:"Solve for x: 3x - 7 = 14"},
+    {icon:"📐",txt:"Geometry help",tag:"Shapes & angles",q:"How do I find the area of a triangle?"},
+    {icon:"📊",txt:"Statistics",tag:"Data & probability",q:"Explain mean, median and mode with examples"},
+    {icon:"∫",txt:"Calculus",tag:"Derivatives & integrals",q:"What is a derivative and how do I calculate one?"}
+  ],
+  science:[
+    {icon:"🌱",txt:"Biology topic",tag:"Life science",q:"Explain how photosynthesis works step by step"},
+    {icon:"⚗️",txt:"Chemistry help",tag:"Reactions & elements",q:"What is the difference between ionic and covalent bonds?"},
+    {icon:"⚡",txt:"Physics concept",tag:"Forces & energy",q:"Explain Newton's three laws of motion with examples"},
+    {icon:"🌍",txt:"Earth science",tag:"Environment",q:"How does the water cycle work?"}
+  ],
+  english:[
+    {icon:"📖",txt:"Book analysis",tag:"Literature",q:"Help me analyze themes in Romeo and Juliet"},
+    {icon:"✏️",txt:"Grammar check",tag:"Writing",q:"What is the difference between 'affect' and 'effect'?"},
+    {icon:"📄",txt:"Essay structure",tag:"Writing help",q:"How do I write a strong thesis statement?"},
+    {icon:"🗣️",txt:"Vocabulary",tag:"Word meanings",q:"Give me 10 SAT vocabulary words with definitions and examples"}
+  ],
+  history:[
+    {icon:"🗺️",txt:"Historical event",tag:"World history",q:"What caused World War I?"},
+    {icon:"👑",txt:"Important figures",tag:"People",q:"Who was Napoleon Bonaparte and why was he important?"},
+    {icon:"🏛️",txt:"Ancient history",tag:"Ancient civilizations",q:"Tell me about ancient Egypt — culture, religion, and achievements"},
+    {icon:"🇺🇸",txt:"American history",tag:"US history",q:"What led to the American Civil War?"}
+  ],
+  code:[
+    {icon:"🐍",txt:"Python basics",tag:"Programming",q:"Teach me Python loops with examples"},
+    {icon:"🌐",txt:"Web development",tag:"HTML/CSS/JS",q:"How do I center a div in CSS?"},
+    {icon:"🐛",txt:"Debug my code",tag:"Troubleshooting",q:"Here's my code, can you find the bug? [paste code here]"},
+    {icon:"📦",txt:"Data structures",tag:"CS concepts",q:"Explain arrays vs linked lists — when to use which?"}
+  ],
+  essay:[
+    {icon:"📝",txt:"Essay outline",tag:"Planning",q:"Help me outline an essay about climate change"},
+    {icon:"🎯",txt:"Thesis help",tag:"Argument",q:"How do I write a strong thesis for a persuasive essay?"},
+    {icon:"🔗",txt:"Transitions",tag:"Flow & style",q:"What are good transition words to connect paragraphs?"},
+    {icon:"✅",txt:"Feedback",tag:"Review",q:"Can you give feedback on this paragraph? [paste here]"}
+  ],
+  quiz:[
+    {icon:"🧠",txt:"History quiz",tag:"Test yourself",q:"Quiz me on World War II — 5 questions"},
+    {icon:"🔬",txt:"Science quiz",tag:"Test yourself",q:"Give me a 5-question quiz on the human body"},
+    {icon:"📐",txt:"Math quiz",tag:"Test yourself",q:"Quiz me on algebra — 5 problems with answers"},
+    {icon:"📚",txt:"Vocab quiz",tag:"Test yourself",q:"Quiz me on English vocabulary — 5 words with definitions"}
+  ]
+};
+
+// ── AUTH + LIMIT INIT ──
+onAuthStateChanged(auth,async user=>{
+  if(!user){location.href="auth.html";return;}
+  userName=user.displayName||user.email.split("@")[0];
+  userInit=userName[0].toUpperCase();
+  userPhoto=user.photoURL||"";
+  try{await updateDoc(doc(db,"users",user.uid),{isOnline:true,lastActive:serverTimestamp(),
+    email:(user.email||"").toLowerCase().trim(),displayName:userName,name:userName});}catch(e){}
+  const goOff=()=>{try{updateDoc(doc(db,"users",user.uid),{isOnline:false,lastActive:serverTimestamp()});}catch(e){}};
+  window.addEventListener("beforeunload",goOff);
+  window.addEventListener("pagehide",goOff);
+  document.addEventListener("visibilitychange",()=>{
+    if(document.hidden){try{updateDoc(doc(db,"users",user.uid),{isOnline:false});}catch(e){};}
+    else{try{updateDoc(doc(db,"users",user.uid),{isOnline:true,lastActive:serverTimestamp()});}catch(e){};}
+  });
+  setInterval(()=>{try{updateDoc(doc(db,"users",user.uid),{lastActive:serverTimestamp(),isOnline:true});}catch(e){}},2*60*1000);
+
+  // Load premium status + usage from Firestore
+  try{
+    const snap=await getDoc(doc(db,"users",user.uid));
+    const d=snap.data()||{};
+    isPremium=d.isPremium===true&&(d.subscriptionEnd?.toMillis?.()??0)>Date.now();
+    dailyLimit=isPremium?PREMIUM_LIMIT:FREE_LIMIT;
+
+    // Check if usage is from today — reset if not
+    const todayKey=new Date().toISOString().slice(0,10); // "YYYY-MM-DD"
+    const storedDay=d.aiUsageDay||"";
+    if(storedDay!==todayKey){
+      // New day — reset counter in Firestore
+      await updateDoc(doc(db,"users",user.uid),{aiUsageDay:todayKey,aiUsageCount:0}).catch(()=>{});
+      todayUsage=0;
+    } else {
+      todayUsage=d.aiUsageCount||0;
+    }
+  }catch(e){todayUsage=0;}
+
+  updateLimitUI();
+  renderSuggestions();
+  lucide.createIcons();
+});
+
+
+// ── LIMIT UI ──
+function updateLimitUI(){
+  const bar=G("limitBar"),fill=G("limitFill"),count=G("limitCount"),upgradeBtn=G("limitUpgradeBtn");
+  if(isPremium){
+    // Premium — show golden badge, hide upgrade btn
+    bar.style.display="flex";
+    bar.innerHTML=`<span class="prem-badge"><i data-lucide="crown"></i>Premium — Unlimited AI</span>`;
+    lucide.createIcons();
+    return;
+  }
+  // Free user
+  bar.style.display="flex";
+  const pct=Math.min(100,Math.round(todayUsage/FREE_LIMIT*100));
+  const remaining=FREE_LIMIT-todayUsage;
+  const cls=pct>=100?"full":pct>=75?"warn":"";
+  fill.style.width=pct+"%";fill.className="limit-fill"+(cls?" "+cls:"");
+  count.textContent=todayUsage+" / "+FREE_LIMIT;count.className="limit-count"+(cls?" "+cls:"");
+  // Show/hide paywall
+  const hit=todayUsage>=FREE_LIMIT;
+  G("paywall").classList.toggle("show",hit);
+  G("msgs").style.display=hit?"none":(history.length?"flex":"none");
+  G("suggestionsWrap").style.display=hit?"none":(history.length?"none":"flex");
+  G("aiInput").disabled=hit;
+  G("sendBtn").disabled=hit||G("aiInput").value.trim().length===0;
+  if(hit){
+    G("aiInput").placeholder="Daily limit reached — upgrade for unlimited access";
+    startResetTimer();
+  }
+}
+
+function startResetTimer(){
+  if(resetTimerInt)clearInterval(resetTimerInt);
+  function tick(){
+    const now=new Date();
+    const midnight=new Date(now);midnight.setHours(24,0,0,0);
+    const diff=midnight-now;
+    const h=Math.floor(diff/3600000);const m=Math.floor((diff%3600000)/60000);const s=Math.floor((diff%60000)/1000);
+    const el=G("resetTimer");if(el)el.textContent=`${h}h ${m}m ${s}s`;
+  }
+  tick();resetTimerInt=setInterval(tick,1000);
+}
+
+async function incrementUsage(userId){
+  todayUsage++;
+  updateLimitUI();
+  const todayKey=new Date().toISOString().slice(0,10);
+  try{
+    await updateDoc(doc(db,"users",userId),{
+      aiUsageCount:increment(1),
+      aiUsageDay:todayKey,
+      messagesSent:increment(1)
+    });
+  }catch(e){console.error("usage track:",e);}
+}
+
+// Render suggestions
+function renderSuggestions(){
+  const grid=G("suggestionsGrid");
+  const list=SUGGESTIONS[currentMode]||SUGGESTIONS.general;
+  grid.innerHTML="";
+  list.forEach(s=>{
+    const btn=document.createElement("button");btn.className="suggestion-btn";
+    btn.innerHTML=`<div class="sb-ico">${s.icon}</div><div><div class="sb-txt">${s.txt}</div><div class="sb-tag">${s.tag}</div></div>`;
+    btn.onclick=()=>{G("aiInput").value=s.q;G("aiInput").dispatchEvent(new Event("input"));autoResize();sendMessage();};
+    grid.appendChild(btn);
+  });
+}
+
+// Mode switching
+document.querySelectorAll(".sbj").forEach(btn=>{
+  btn.addEventListener("click",function(){
+    document.querySelectorAll(".sbj").forEach(b=>b.classList.remove("active"));
+    this.classList.add("active");
+    currentMode=this.dataset.mode;
+    history=[];
+    if(G("msgs").style.display!=="none"){
+      G("msgs").innerHTML="";G("msgs").style.display="none";
+      G("suggestionsWrap").style.display="flex";
+    }
+    renderSuggestions();
+  });
+});
+
+// Send
+async function sendMessage(){
+  const input=G("aiInput");const text=input.value.trim();
+  if(!text||loading)return;
+
+  // Check limit (skip for premium)
+  if(!isPremium&&todayUsage>=FREE_LIMIT){
+    updateLimitUI();return;
+  }
+
+  loading=true;
+
+  // Show msgs, hide suggestions
+  G("suggestionsWrap").style.display="none";
+  G("paywall").classList.remove("show");
+  G("msgs").style.display="flex";
+
+  // Add user bubble
+  appendBubble("user",text);
+  history.push({role:"user",content:text});
+  input.value="";autoResize();G("sendBtn").disabled=true;G("charWarn").style.display="none";
+
+  // Typing indicator
+  const typingEl=appendTyping();
+
+  try{
+    const res=await fetch(GROQ_URL,{
+      method:"POST",
+      headers:{"Content-Type":"application/json","Authorization":"Bearer "+GROQ_KEY},
+      body:JSON.stringify({
+        model:MODEL,
+        max_tokens:1500,
+        temperature:0.7,
+        messages:[
+          {role:"system",content:MODES[currentMode].system},
+          ...history.slice(-10)
+        ]
+      })
+    });
+    if(!res.ok)throw new Error("API error "+res.status);
+    const data=await res.json();
+    const reply=data.choices?.[0]?.message?.content||"Sorry, I couldn't generate a response.";
+    typingEl.remove();
+    appendBubble("ai",reply);
+    history.push({role:"assistant",content:reply});
+    // Track usage (only for free users — premium is unlimited)
+    if(auth.currentUser)await incrementUsage(auth.currentUser.uid);
+  }catch(e){
+    typingEl.remove();
+    appendBubble("ai","❌ Sorry, I had trouble connecting. Please check your internet and try again.\n\n*Error: "+e.message+"*");
+    toast("Connection error — please try again","err");
+  }finally{loading=false;G("sendBtn").disabled=G("aiInput").value.trim().length===0;}
+}
+
+// Bubble builder
+function appendBubble(role,text){
+  const wrap=G("msgs");
+  const now=new Date().toLocaleTimeString([],{hour:"2-digit",minute:"2-digit"});
+  const isUser=role==="user";
+  const row=document.createElement("div");
+  row.className="msg-row "+(isUser?"user":"ai");
+  const avHtml=isUser
+    ?(userPhoto?`<img src="${esc(userPhoto)}" alt="">`:`<span>${userInit}</span>`)
+    :`<i data-lucide="bot"></i>`;
+  const html=isUser?esc(text):formatAI(text);
+  row.innerHTML=`
+    <div class="bav ${isUser?"user":"ai"}">${avHtml}</div>
+    <div class="bcol">
+      <div class="bubble">${html}</div>
+      <div class="bmeta">${isUser?userName:"StudyFlow AI"} · ${now}${!isUser?` <button class="copy-btn" onclick="copyText(this)"><i data-lucide="copy"></i>Copy</button>`:""}</div>
+    </div>`;
+  wrap.appendChild(row);
+  wrap.scrollTop=wrap.scrollHeight;
+  lucide.createIcons();
+  return row;
+}
+
+function appendTyping(){
+  const wrap=G("msgs");
+  const row=document.createElement("div");row.className="msg-row ai";
+  row.innerHTML=`<div class="bav ai"><i data-lucide="bot"></i></div>
+    <div class="bcol"><div class="typing-bubble"><div class="td"></div><div class="td"></div><div class="td"></div></div></div>`;
+  wrap.appendChild(row);wrap.scrollTop=wrap.scrollHeight;
+  lucide.createIcons();return row;
+}
+
+// Markdown-like formatter
+function formatAI(text){
+  let s=text
+    .replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;")
+    .replace(/```[\w]*\n?([\s\S]*?)```/g,(_,code)=>`<pre>${code.trim()}</pre>`)
+    .replace(/`([^`]+)`/g,"<code>$1</code>")
+    .replace(/\*\*(.+?)\*\*/g,"<strong>$1</strong>")
+    .replace(/\*(.+?)\*/g,"<em>$1</em>")
+    .replace(/^### (.+)$/gm,"<strong>$1</strong>")
+    .replace(/^## (.+)$/gm,"<strong>$1</strong>")
+    .replace(/^# (.+)$/gm,"<strong>$1</strong>")
+    .replace(/^[-*] (.+)$/gm,"• $1")
+    .replace(/\n{2,}/g,"</p><p>")
+    .replace(/\n/g,"<br>");
+  return `<p>${s}</p>`;
+}
+
+// Copy helpers
+window.copyText=function(btn){
+  const bubble=btn.closest(".bcol").querySelector(".bubble");
+  navigator.clipboard.writeText(bubble.innerText).then(()=>{
+    btn.innerHTML='<i data-lucide="check"></i>Copied!';lucide.createIcons();
+    setTimeout(()=>{btn.innerHTML='<i data-lucide="copy"></i>Copy';lucide.createIcons();},2000);
+  });
+};
+
+// Clear
+G("clearBtn").onclick=()=>{
+  if(!confirm("Clear the conversation?"))return;
+  history=[];G("msgs").innerHTML="";G("msgs").style.display="none";
+  G("suggestionsWrap").style.display="flex";renderSuggestions();
+};
+
+// Copy all
+G("copyAllBtn").onclick=()=>{
+  const bubbles=[...G("msgs").querySelectorAll(".bubble")].map(b=>b.innerText).join("\n\n---\n\n");
+  if(!bubbles){toast("Nothing to copy","err");return;}
+  navigator.clipboard.writeText(bubbles).then(()=>toast("Conversation copied!"));
+};
+
+// Input
+function autoResize(){const ta=G("aiInput");ta.style.height="auto";ta.style.height=Math.min(ta.scrollHeight,160)+"px";}
+G("aiInput").addEventListener("input",()=>{
+  autoResize();
+  const l=G("aiInput").value.length;
+  G("sendBtn").disabled=l===0||loading;
+  G("charWarn").style.display=l>3000?"block":"none";
+});
+G("aiInput").addEventListener("keydown",e=>{
+  if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();if(!G("sendBtn").disabled)sendMessage();}
+});
+G("sendBtn").onclick=sendMessage;
+
+// Toast
+function toast(msg,type=""){
+  const t=G("toast");t.textContent=msg;t.className="toast"+(type?" "+type:"");
+  t.style.display="block";clearTimeout(t._t);t._t=setTimeout(()=>t.style.display="none",3000);
+}
+function esc(s){return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");}
+lucide.createIcons();
+</script>
+
+<!-- NAV + PWA -->
+<script>
+(()=>{
+  const ham=document.getElementById("ham");
+  const sidebar=document.getElementById("sidebar");
+  const noverlay=document.getElementById("noverlay");
+  function open(){sidebar.classList.add("open");noverlay.classList.add("open");ham.innerHTML='<i data-lucide="x"></i>';lucide.createIcons();}
+  function close(){sidebar.classList.remove("open");noverlay.classList.remove("open");ham.innerHTML='<i data-lucide="menu"></i>';lucide.createIcons();}
+  ham.addEventListener("click",()=>sidebar.classList.contains("open")?close():open());
+  noverlay.addEventListener("click",close);
+  document.querySelectorAll(".ni").forEach(a=>a.addEventListener("click",()=>{if(window.innerWidth<=768)close();}));
+})();
+if("serviceWorker"in navigator)navigator.serviceWorker.register("/sw.js").catch(()=>{});
+</script>
+</body>
+</html>

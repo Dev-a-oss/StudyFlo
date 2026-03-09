@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>StudyFlow • Sign In</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+html,body{height:100%;font-family:'DM Sans',sans-serif;}
+body{
+  background:#080a12;color:#eef0ff;
+  display:flex;align-items:center;justify-content:center;min-height:100vh;
+  background-image:
+    radial-gradient(ellipse 70% 60% at 20% 10%, rgba(79,70,229,.18) 0%, transparent 60%),
+    radial-gradient(ellipse 60% 50% at 80% 90%, rgba(109,40,217,.14) 0%, transparent 60%);
+}
+
+.card{
+  width:100%;max-width:420px;
+  background:rgba(13,15,26,.95);
+  border:1px solid rgba(255,255,255,.09);
+  border-radius:24px;
+  padding:2.5rem 2rem;
+  box-shadow:0 25px 60px rgba(0,0,0,.5);
+  backdrop-filter:blur(20px);
+  margin:1rem;
+  animation:fadeUp .4s ease both;
+}
+@keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+
+/* Logo */
+.logo{display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:1.75rem;}
+.logo-icon{
+  width:44px;height:44px;border-radius:13px;
+  background:linear-gradient(135deg,#4f46e5,#6d28d9);
+  display:flex;align-items:center;justify-content:center;
+  box-shadow:0 0 20px rgba(129,140,248,.4);
+  font-size:1.3rem;
+}
+.logo-text{font-family:'Syne',sans-serif;font-size:1.5rem;font-weight:800;letter-spacing:-.03em;
+  background:linear-gradient(110deg,#fff 20%,#818cf8 100%);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+
+/* Heading */
+.heading{text-align:center;margin-bottom:2rem;}
+.heading h1{font-family:'Syne',sans-serif;font-size:1.35rem;font-weight:800;margin-bottom:.4rem;}
+.heading p{font-size:.85rem;color:#5a6480;line-height:1.6;}
+
+/* Google button */
+.google-btn{
+  width:100%;display:flex;align-items:center;justify-content:center;gap:12px;
+  padding:.85rem 1.5rem;
+  background:white;color:#1a1a2e;
+  border:none;border-radius:13px;
+  font-family:'Syne',sans-serif;font-size:.92rem;font-weight:700;
+  cursor:pointer;transition:all .2s;
+  box-shadow:0 2px 16px rgba(0,0,0,.25);
+  position:relative;overflow:hidden;
+}
+.google-btn:hover{transform:translateY(-2px);box-shadow:0 6px 24px rgba(0,0,0,.35);}
+.google-btn:active{transform:scale(.98);}
+.google-btn:disabled{opacity:.6;cursor:not-allowed;transform:none;}
+.google-btn svg{width:20px;height:20px;flex-shrink:0;}
+
+/* Spinner inside button */
+.spinner{
+  width:18px;height:18px;border-radius:50%;
+  border:2.5px solid rgba(26,26,46,.2);
+  border-top-color:#4f46e5;
+  animation:spin .7s linear infinite;
+  display:none;
+}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* Divider */
+.divider{display:flex;align-items:center;gap:.75rem;margin:1.5rem 0;}
+.divider::before,.divider::after{content:'';flex:1;height:1px;background:rgba(255,255,255,.07);}
+.divider span{font-size:.72rem;color:#2e3450;white-space:nowrap;}
+
+/* Features */
+.features{display:flex;flex-direction:column;gap:.6rem;}
+.feat{display:flex;align-items:center;gap:10px;padding:.6rem .75rem;
+  background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.05);
+  border-radius:10px;font-size:.8rem;color:#5a6480;}
+.feat-icon{width:26px;height:26px;border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:.85rem;}
+.feat-icon.v{background:rgba(52,211,153,.12);}
+.feat-icon.p{background:rgba(129,140,248,.12);}
+.feat-icon.a{background:rgba(251,191,36,.12);}
+
+/* Footer */
+.footer{text-align:center;margin-top:1.5rem;font-size:.72rem;color:#2e3450;line-height:1.7;}
+.footer a{color:#818cf8;text-decoration:none;}
+.footer a:hover{text-decoration:underline;}
+
+/* Error toast */
+.err-toast{
+  display:none;
+  background:rgba(248,113,113,.12);border:1px solid rgba(248,113,113,.25);
+  color:#f87171;border-radius:10px;padding:.65rem 1rem;
+  font-size:.8rem;text-align:center;margin-bottom:1rem;
+  animation:fadeUp .2s ease;
+}
+</style>
+</head>
+<body>
+
+<div class="card">
+
+  <div class="logo">
+    <div class="logo-icon">⚡</div>
+    <span class="logo-text">StudyFlow</span>
+  </div>
+
+  <div class="heading">
+    <h1>Welcome Back</h1>
+    <p>Sign in with your Google account to access your study dashboard</p>
+  </div>
+
+  <div class="err-toast" id="errToast"></div>
+
+  <button class="google-btn" id="googleBtn" onclick="signInWithGoogle()">
+    <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+      <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+      <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+      <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
+      <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+    </svg>
+    <span id="btnText">Continue with Google</span>
+    <div class="spinner" id="spinner"></div>
+  </button>
+
+  <div class="divider"><span>what you get</span></div>
+
+  <div class="features">
+    <div class="feat"><div class="feat-icon v">📚</div>Access all study materials & resources</div>
+    <div class="feat"><div class="feat-icon p">🤖</div>AI study assistant powered by Groq</div>
+    <div class="feat"><div class="feat-icon a">👥</div>Group chat & private messaging</div>
+  </div>
+
+  <div class="footer">
+    By signing in you agree to our
+    <a href="terms.html">Terms of Service</a><br>
+    Only Google sign-in is supported
+  </div>
+
+</div>
+
+<script type="module">
+import { initializeApp }    from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged }
+                            from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+import { getFirestore, doc, setDoc, getDoc, serverTimestamp }
+                            from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+const app  = initializeApp({
+  apiKey:            "AIzaSyA-4YyVROZz-OIAGTWhpMMpuJe2Xag9Fig",
+  authDomain:        "vibe-jolt.firebaseapp.com",
+  projectId:         "vibe-jolt",
+  storageBucket:     "vibe-jolt.appspot.com",
+  messagingSenderId: "386156754842",
+  appId:             "1:386156754842:web:8b5e45a3c7f20ac9616c23"
+});
+const auth     = getAuth(app);
+const db       = getFirestore(app);
+const provider = new GoogleAuthProvider();
+
+// If already signed in AND we're not mid-sign-in, go to dashboard
+let signingIn = false;
+onAuthStateChanged(auth, async user => {
+  if(user && !signingIn) {
+    // Update presence for returning users who bypass the sign-in button
+    try {
+      const userRef = doc(db, "users", user.uid);
+      const existing = await getDoc(userRef);
+      if (!existing.exists()) {
+        await setDoc(userRef, {
+          uid: user.uid,
+          email: user.email || "",
+          displayName: user.displayName || user.email.split("@")[0],
+          name: user.displayName || user.email.split("@")[0],
+          photoURL: user.photoURL || "",
+          createdAt: serverTimestamp(),
+          lastActive: serverTimestamp(),
+          isOnline: true,
+          messagesSent: 0,
+          streak: 0,
+          score: 0
+        });
+      } else {
+        await setDoc(userRef, {
+          displayName: user.displayName || existing.data().displayName || "",
+          name: user.displayName || existing.data().name || "",
+          photoURL: user.photoURL || existing.data().photoURL || "",
+          lastActive: serverTimestamp(),
+          isOnline: true
+        }, { merge: true });
+      }
+    } catch(e) { console.error("presence update:", e); }
+    location.href = "index.html";
+  }
+});
+
+function showError(msg) {
+  const t = document.getElementById("errToast");
+  t.textContent = msg;
+  t.style.display = "block";
+}
+function setLoading(on) {
+  document.getElementById("googleBtn").disabled = on;
+  document.getElementById("btnText").textContent = on ? "Signing in…" : "Continue with Google";
+  document.getElementById("spinner").style.display = on ? "block" : "none";
+}
+
+window.signInWithGoogle = async function() {
+  signingIn = true;
+  setLoading(true);
+  document.getElementById("errToast").style.display = "none";
+  try {
+    const result = await signInWithPopup(auth, provider);
+    const user   = result.user;
+
+    // Create or update user doc — only safe fields, no premium
+    const userRef  = doc(db, "users", user.uid);
+    const existing = await getDoc(userRef);
+
+    if (!existing.exists()) {
+      // Brand new user — create doc
+      await setDoc(userRef, {
+        uid:         user.uid,
+        email:       user.email || "",
+        displayName: user.displayName || user.email.split("@")[0],
+        name:        user.displayName || user.email.split("@")[0],
+        photoURL:    user.photoURL || "",
+        createdAt:   serverTimestamp(),
+        lastActive:  serverTimestamp(),
+        isOnline:    true,
+        messagesSent: 0,
+        streak:      0,
+        score:       0
+      });
+    } else {
+      // Returning user — update safe fields only
+      await setDoc(userRef, {
+        displayName: user.displayName || existing.data().displayName || "",
+        name:        user.displayName || existing.data().name || "",
+        photoURL:    user.photoURL || existing.data().photoURL || "",
+        lastActive:  serverTimestamp(),
+        isOnline:    true
+      }, { merge: true });
+    }
+
+    location.href = "index.html";
+
+  } catch(err) {
+    signingIn = false;
+    setLoading(false);
+    // User closed popup — don't show error
+    if(err.code === "auth/popup-closed-by-user" || err.code === "auth/cancelled-popup-request") return;
+    if(err.code === "auth/popup-blocked") {
+      showError("Popup was blocked. Please allow popups for this site and try again.");
+    } else {
+      showError("Sign-in failed: " + (err.message || "Unknown error"));
+    }
+    console.error("Auth error:", err);
+  }
+};
+</script>
+</body>
+</html>

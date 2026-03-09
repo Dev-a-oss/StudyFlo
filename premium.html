@@ -1,0 +1,548 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>StudyFlow • Go Premium</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/lucide@latest"></script>
+<style>
+:root{
+  --primary:#818cf8;--primary-deep:#4f46e5;--primary-glow:rgba(129,140,248,.22);
+  --bg:#080a12;--sidebar:#0b0d17;--surface:#0d0f1a;
+  --card:rgba(255,255,255,.04);--card-border:rgba(255,255,255,.08);--border:rgba(255,255,255,.07);
+  --txt:#eef0ff;--txt-muted:#5a6480;--txt-dim:#2e3450;
+  --green:#34d399;--amber:#fbbf24;--red:#f87171;
+  --fs-xs:clamp(.58rem,1.1vw,.68rem);
+  --fs-sm:clamp(.75rem,1.4vw,.875rem);
+  --fs-base:clamp(.875rem,1.8vw,1rem);
+  --fs-lg:clamp(1rem,2.2vw,1.25rem);
+}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+html{font-size:16px;-webkit-text-size-adjust:100%;}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--txt);display:flex;min-height:100vh;overflow-x:hidden;}
+
+/* Ambient */
+body::before{
+  content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
+  background:
+    radial-gradient(ellipse 70% 55% at 50% -10%,rgba(79,70,229,.18) 0%,transparent 60%),
+    radial-gradient(ellipse 40% 30% at 10% 60%, rgba(109,40,217,.1) 0%,transparent 60%),
+    radial-gradient(ellipse 35% 30% at 90% 80%, rgba(251,191,36,.06) 0%,transparent 60%);
+}
+
+/* ── SIDEBAR ── */
+nav{
+  width:250px;min-width:250px;background:var(--sidebar);
+  border-right:1px solid var(--border);
+  display:flex;flex-direction:column;
+  height:100vh;position:fixed;top:0;left:0;
+  overflow-y:auto;z-index:100;
+}
+nav::after{content:'';position:absolute;top:0;right:0;width:1px;height:100%;background:linear-gradient(to bottom,transparent,var(--primary-glow) 40%,var(--primary-glow) 60%,transparent);pointer-events:none;}
+.logo{font-family:'Syne',sans-serif;font-size:1.45rem;font-weight:800;letter-spacing:-.03em;display:flex;align-items:center;gap:9px;padding:1.75rem 1.4rem;text-decoration:none;border-bottom:1px solid var(--border);flex-shrink:0;}
+.logo i{width:20px;height:20px;color:var(--primary);filter:drop-shadow(0 0 6px var(--primary));}
+.logo-text{background:linear-gradient(110deg,#fff 20%,var(--primary) 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.nav-scroll{flex:1;padding:.8rem .7rem 1rem;}
+.nav-label{font-size:.62rem;font-weight:700;text-transform:uppercase;letter-spacing:.13em;color:var(--txt-dim);padding:.9rem 12px .35rem;user-select:none;}
+.nav-item{display:flex;align-items:center;gap:10px;padding:10px 12px;text-decoration:none;color:var(--txt-muted);font-size:.855rem;font-weight:500;border-radius:10px;margin-bottom:2px;transition:background .16s,color .16s;position:relative;}
+.nav-item i{width:15px;height:15px;flex-shrink:0;}
+.nav-item:hover{background:rgba(129,140,248,.08);color:var(--txt);}
+.nav-item.active{background:rgba(129,140,248,.13);color:var(--primary);}
+.nav-item.active::before{content:'';position:absolute;left:0;top:22%;bottom:22%;width:3px;background:var(--primary);border-radius:0 3px 3px 0;box-shadow:0 0 8px var(--primary);}
+.chip{margin-left:auto;background:rgba(129,140,248,.15);color:var(--primary);font-size:.6rem;font-weight:700;padding:2px 6px;border-radius:20px;}
+
+/* ── MAIN ── */
+main{margin-left:250px;flex:1;padding:3rem 2.5rem 5rem;position:relative;z-index:1;}
+
+/* ── HERO ── */
+.hero{text-align:center;margin-bottom:3.5rem;animation:fadeUp .5s ease both;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+
+/* Animated crown badge */
+.crown-badge{
+  display:inline-flex;align-items:center;justify-content:center;
+  width:64px;height:64px;border-radius:50%;
+  background:linear-gradient(135deg,rgba(251,191,36,.2),rgba(251,191,36,.06));
+  border:1px solid rgba(251,191,36,.3);
+  margin:0 auto 1.2rem;
+  animation:crownFloat 3s ease-in-out infinite;
+  position:relative;
+}
+.crown-badge::after{
+  content:'';position:absolute;inset:-6px;border-radius:50%;
+  border:1px solid rgba(251,191,36,.15);
+  animation:crownRing 2.5s ease-in-out infinite;
+}
+@keyframes crownFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-5px)}}
+@keyframes crownRing{0%,100%{transform:scale(1);opacity:.4}50%{transform:scale(1.12);opacity:1}}
+.crown-badge i{width:28px;height:28px;color:var(--amber);filter:drop-shadow(0 0 8px rgba(251,191,36,.6));}
+
+.eyebrow{
+  display:inline-flex;align-items:center;gap:6px;
+  font-size:.72rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;
+  color:var(--amber);background:rgba(251,191,36,.08);border:1px solid rgba(251,191,36,.18);
+  padding:4px 13px;border-radius:20px;margin-bottom:.9rem;
+}
+.eyebrow i{width:12px;height:12px;}
+
+.hero-title{
+  font-family:'Syne',sans-serif;font-size:2.9rem;font-weight:800;
+  letter-spacing:-.04em;line-height:1.1;margin-bottom:.75rem;
+}
+.hero-title .grad{
+  background:linear-gradient(110deg,var(--primary) 0%,#a78bfa 50%,var(--amber) 100%);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+}
+.hero-sub{color:var(--txt-muted);font-size:.95rem;max-width:440px;margin:0 auto 1.5rem;line-height:1.7;}
+
+/* Billing toggle */
+.toggle-wrap{
+  display:inline-flex;align-items:center;gap:10px;
+  background:rgba(255,255,255,.04);border:1px solid var(--card-border);
+  border-radius:30px;padding:5px 5px 5px 14px;margin-bottom:0;
+  font-size:.82rem;font-weight:600;color:var(--txt-muted);
+}
+.toggle-wrap .save-chip{
+  background:rgba(52,211,153,.1);color:var(--green);border:1px solid rgba(52,211,153,.2);
+  font-size:.65rem;font-weight:700;padding:2px 8px;border-radius:12px;
+}
+.toggle-btn{
+  position:relative;width:44px;height:24px;
+  background:rgba(255,255,255,.08);border:1px solid var(--card-border);
+  border-radius:30px;cursor:pointer;transition:background .2s;
+  flex-shrink:0;
+}
+.toggle-btn.on{background:linear-gradient(135deg,#4f46e5,#6d28d9);border-color:transparent;}
+.toggle-knob{
+  position:absolute;top:2px;left:2px;
+  width:18px;height:18px;border-radius:50%;
+  background:white;transition:transform .22s cubic-bezier(.34,1.56,.64,1);
+  box-shadow:0 1px 4px rgba(0,0,0,.3);
+}
+.toggle-btn.on .toggle-knob{transform:translateX(20px);}
+
+/* ── PLANS ── */
+.plans{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(300px,1fr));
+  gap:1.5rem;max-width:740px;margin:2.5rem auto 0;
+}
+
+.plan{
+  background:var(--card);border:1px solid var(--card-border);
+  border-radius:24px;padding:2rem 1.8rem;
+  position:relative;overflow:hidden;
+  transition:transform .22s,border-color .22s,box-shadow .22s;
+  animation:fadeUp .5s ease both;
+}
+.plan:nth-child(1){animation-delay:.08s;}
+.plan:nth-child(2){animation-delay:.16s;}
+
+/* subtle top shimmer */
+.plan::before{
+  content:'';position:absolute;top:0;left:10%;right:10%;height:1px;
+  background:linear-gradient(90deg,transparent,rgba(255,255,255,.12),transparent);
+}
+
+.plan:hover{transform:translateY(-5px);box-shadow:0 16px 40px rgba(0,0,0,.35);}
+
+.plan.popular{
+  border-color:rgba(129,140,248,.35);
+  background:rgba(79,70,229,.07);
+  box-shadow:0 0 50px rgba(79,70,229,.14);
+}
+.plan.popular::before{
+  background:linear-gradient(90deg,transparent,rgba(129,140,248,.35),transparent);
+}
+.plan.popular:hover{box-shadow:0 20px 50px rgba(79,70,229,.3);}
+
+/* Popular badge */
+.pop-badge{
+  position:absolute;top:-1px;left:50%;transform:translateX(-50%);
+  background:linear-gradient(135deg,#4f46e5,#6d28d9);
+  color:white;padding:5px 18px;border-radius:0 0 14px 14px;
+  font-family:'Syne',sans-serif;font-size:.72rem;font-weight:700;
+  letter-spacing:.06em;white-space:nowrap;
+  box-shadow:0 4px 18px rgba(79,70,229,.4);
+}
+
+/* Plan header */
+.plan-icon{
+  width:40px;height:40px;border-radius:12px;
+  display:flex;align-items:center;justify-content:center;
+  margin-bottom:1rem;
+}
+.plan-icon i{width:18px;height:18px;}
+.icon-monthly{background:rgba(129,140,248,.12);border:1px solid rgba(129,140,248,.2);}
+.icon-monthly i{color:var(--primary);}
+.icon-yearly{background:rgba(251,191,36,.12);border:1px solid rgba(251,191,36,.2);}
+.icon-yearly i{color:var(--amber);}
+
+.plan-name{font-family:'Syne',sans-serif;font-size:.8rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--txt-muted);margin-bottom:.4rem;}
+
+.price-row{display:flex;align-items:baseline;gap:4px;margin-bottom:.25rem;}
+.price{font-family:'Syne',sans-serif;font-size:2.8rem;font-weight:800;letter-spacing:-.04em;line-height:1;}
+.price-per{font-size:.85rem;color:var(--txt-muted);}
+.monthly-equiv{font-size:.75rem;color:var(--txt-muted);margin-bottom:.8rem;min-height:18px;}
+
+.savings-pill{
+  display:inline-flex;align-items:center;gap:5px;
+  font-size:.75rem;font-weight:700;
+  color:var(--green);background:rgba(52,211,153,.1);
+  border:1px solid rgba(52,211,153,.2);
+  padding:3px 10px;border-radius:20px;
+  margin-bottom:1.2rem;
+}
+.savings-pill i{width:11px;height:11px;}
+
+.divider{height:1px;background:var(--border);margin:1.2rem 0;}
+
+/* Features */
+.features{list-style:none;display:flex;flex-direction:column;gap:9px;margin-bottom:1.6rem;}
+.features li{display:flex;align-items:center;gap:10px;font-size:.855rem;color:var(--txt);}
+.feat-check{
+  width:20px;height:20px;border-radius:50%;flex-shrink:0;
+  background:rgba(52,211,153,.1);border:1px solid rgba(52,211,153,.2);
+  display:flex;align-items:center;justify-content:center;
+}
+.feat-check i{width:11px;height:11px;color:var(--green);}
+
+/* CTA button */
+.btn-cta{
+  width:100%;padding:.9rem 1.5rem;border:none;border-radius:13px;
+  font-family:'Syne',sans-serif;font-size:.88rem;font-weight:700;
+  cursor:pointer;transition:transform .18s,box-shadow .18s;
+  letter-spacing:.01em;display:flex;align-items:center;justify-content:center;gap:7px;
+}
+.btn-cta i{width:15px;height:15px;}
+.plan:not(.popular) .btn-cta{
+  background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.11);color:var(--txt);
+}
+.plan:not(.popular) .btn-cta:hover{background:rgba(255,255,255,.1);transform:translateY(-1px);}
+.plan.popular .btn-cta{
+  background:linear-gradient(135deg,#4f46e5,#6d28d9);color:white;
+  box-shadow:0 4px 22px rgba(79,70,229,.4);
+}
+.plan.popular .btn-cta:hover{transform:translateY(-2px);box-shadow:0 8px 30px rgba(79,70,229,.55);}
+
+/* ── SOCIAL PROOF ── */
+.social-section{max-width:740px;margin:3rem auto 0;text-align:center;animation:fadeUp .5s ease .25s both;}
+.social-label{font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--txt-dim);margin-bottom:1rem;}
+.testimonials{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:.8rem;margin-bottom:2rem;}
+.tcard{
+  background:var(--card);border:1px solid var(--card-border);
+  border-radius:16px;padding:1rem 1.1rem;text-align:left;
+}
+.tcard-stars{color:var(--amber);font-size:.85rem;margin-bottom:.5rem;letter-spacing:1px;}
+.tcard-text{font-size:.8rem;color:var(--txt-muted);line-height:1.55;margin-bottom:.6rem;}
+.tcard-user{font-size:.72rem;font-weight:600;color:var(--txt);}
+
+/* Trust badges */
+.trust{display:flex;align-items:center;justify-content:center;gap:1.6rem;flex-wrap:wrap;}
+.trust-item{display:flex;align-items:center;gap:6px;font-size:.75rem;color:var(--txt-muted);}
+.trust-item i{width:14px;height:14px;color:var(--green);}
+
+/* FAQ accordion */
+.faq-section{max-width:580px;margin:3rem auto 0;animation:fadeUp .5s ease .3s both;}
+.faq-title{font-family:'Syne',sans-serif;font-size:1.1rem;font-weight:700;text-align:center;margin-bottom:1.2rem;}
+.faq-item{border-bottom:1px solid var(--border);}
+.faq-q{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:.9rem 0;cursor:pointer;font-size:.875rem;font-weight:600;
+  color:var(--txt);transition:color .18s;user-select:none;
+}
+.faq-q:hover{color:var(--primary);}
+.faq-q i{width:15px;height:15px;flex-shrink:0;transition:transform .22s;color:var(--txt-muted);}
+.faq-item.open .faq-q i{transform:rotate(45deg);}
+.faq-a{
+  font-size:.82rem;color:var(--txt-muted);line-height:1.7;
+  max-height:0;overflow:hidden;transition:max-height .3s ease,padding .3s ease;
+}
+.faq-item.open .faq-a{max-height:200px;padding-bottom:.9rem;}
+
+/* ── HAMBURGER ── */
+.hamburger{display:none;position:fixed;top:14px;left:14px;z-index:200;width:40px;height:40px;border-radius:10px;background:rgba(13,15,26,.92);backdrop-filter:blur(12px);border:1px solid var(--border);color:var(--txt);align-items:center;justify-content:center;cursor:pointer;box-shadow:0 2px 12px rgba(0,0,0,.4);}
+.hamburger i{width:18px;height:18px;}
+.nav-overlay{display:none;position:fixed;inset:0;z-index:99;background:rgba(0,0,0,.6);backdrop-filter:blur(3px);}
+.nav-overlay.open{display:block;}
+
+/* ── RESPONSIVE ── */
+@media(max-width:1024px){
+  nav{width:220px;}
+  main{margin-left:220px;padding:2.5rem 2rem 4rem;}
+  .hero-title{font-size:2.4rem;}
+}
+
+@media(max-width:768px){
+  .hamburger{display:flex;}
+  nav{transform:translateX(-100%);transition:transform .28s cubic-bezier(.4,0,.2,1);box-shadow:4px 0 40px rgba(0,0,0,.6);width:260px;}
+  nav.open{transform:translateX(0);}
+  main{margin-left:0;width:100%;padding:2rem 1.25rem 4rem;}
+
+  .hero{margin-bottom:2.5rem;}
+  .hero-title{font-size:2rem;}
+  .hero-sub{font-size:.88rem;}
+  .plans{gap:1rem;margin-top:2rem;}
+  .plan{padding:1.75rem 1.4rem;}
+  .price{font-size:2.3rem;}
+  .social-section{margin-top:2rem;}
+  .testimonials{gap:.65rem;}
+  .faq-section{margin-top:2rem;}
+}
+
+@media(max-width:480px){
+  main{padding:1.5rem .85rem 3.5rem;padding-top:4rem;}
+  .hero-title{font-size:1.65rem;letter-spacing:-.03em;}
+  .hero-sub{font-size:.83rem;}
+  .crown-badge{width:52px;height:52px;}
+  .crown-badge i{width:22px;height:22px;}
+  .toggle-wrap{font-size:.76rem;padding:4px 4px 4px 11px;}
+  .plans{grid-template-columns:1fr;}
+  .plan{padding:1.5rem 1.25rem;}
+  .price{font-size:2rem;}
+  .price-per{font-size:.78rem;}
+  .features li{font-size:.8rem;}
+  .btn-cta{padding:.8rem 1.2rem;font-size:.82rem;}
+  .testimonials{grid-template-columns:1fr;}
+  .trust{gap:1rem;}
+  .trust-item{font-size:.72rem;}
+  .faq-q{font-size:.82rem;}
+  .faq-a{font-size:.78rem;}
+}
+
+@media(max-width:360px){
+  main{padding:1.25rem .7rem 3rem;padding-top:3.8rem;}
+  .hero-title{font-size:1.4rem;}
+  .plan{padding:1.25rem 1rem;}
+  .pop-badge{font-size:.65rem;padding:4px 13px;}
+}
+
+@media(prefers-reduced-motion:reduce){
+  *{transition:none !important;animation:none !important;}
+}
+</style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<button class="hamburger" id="hamburger" aria-label="Open menu"><i data-lucide="menu"></i></button>
+<div class="nav-overlay" id="navOverlay"></div>
+<nav id="sidebar">
+  <a href="index.html" class="logo">
+    <i data-lucide="zap"></i><span class="logo-text">StudyFlow</span>
+  </a>
+  <div class="nav-scroll">
+    <div class="nav-label">Menu</div>
+    <a href="index.html"     class="nav-item"><i data-lucide="layout-dashboard"></i>Dashboard</a>
+    <a href="resources.html" class="nav-item"><i data-lucide="file-up"></i>Resources</a>
+    <a href="upload.html"    class="nav-item"><i data-lucide="plus-circle"></i>Upload Material</a>
+    <a href="community.html" class="nav-item"><i data-lucide="users"></i>Community</a>
+    <div class="nav-label">Support</div>
+    <a href="faq.html"       class="nav-item"><i data-lucide="help-circle"></i>FAQ</a>
+    <a href="terms.html"     class="nav-item"><i data-lucide="file-text"></i>Terms</a>
+    <a href="chat.html"      class="nav-item"><i data-lucide="message-circle"></i>Group Chat</a>
+    <div class="nav-label">Account</div>
+    <a href="profile.html"   class="nav-item"><i data-lucide="user"></i>My Profile</a>
+    <a href="assistant.html" class="nav-item"><i data-lucide="bot"></i>AI Assistant</a>
+    <a href="premium.html"   class="nav-item active"><i data-lucide="crown"></i>Go Premium<span class="chip">NEW</span></a>
+    <a href="settings.html"  class="nav-item"><i data-lucide="settings"></i>Settings</a>
+  </div>
+</nav>
+
+<!-- MAIN -->
+<main>
+
+  <!-- Hero -->
+  <div class="hero">
+    <div class="crown-badge"><i data-lucide="crown"></i></div>
+    <div class="eyebrow"><i data-lucide="sparkles"></i>Premium Plans</div>
+    <div class="hero-title">Unlock <span class="grad">Everything</span></div>
+    <p class="hero-sub">Supercharge your studying with unlimited AI, uploads, and ad-free access. Cancel anytime.</p>
+
+    <!-- Billing toggle -->
+    <div class="toggle-wrap">
+      Monthly
+      <div class="toggle-btn" id="billingToggle">
+        <div class="toggle-knob"></div>
+      </div>
+      Yearly <span class="save-chip">Save 33%</span>
+    </div>
+  </div>
+
+  <!-- Plans -->
+  <div class="plans">
+
+    <!-- Monthly -->
+    <div class="plan" id="planMonthly">
+      <div class="plan-icon icon-monthly"><i data-lucide="calendar"></i></div>
+      <div class="plan-name">Monthly</div>
+      <div class="price-row">
+        <div class="price" id="priceMonthly">$4.99</div>
+        <div class="price-per">/ mo</div>
+      </div>
+      <div class="monthly-equiv" id="equivMonthly"></div>
+
+      <div class="divider"></div>
+
+      <ul class="features">
+        <li><span class="feat-check"><i data-lucide="check"></i></span>Unlimited AI messages</li>
+        <li><span class="feat-check"><i data-lucide="check"></i></span>Unlimited uploads &amp; downloads</li>
+        <li><span class="feat-check"><i data-lucide="check"></i></span>Ad-free experience</li>
+        <li><span class="feat-check"><i data-lucide="check"></i></span>Priority in group chat</li>
+        <li><span class="feat-check"><i data-lucide="check"></i></span>VIP member badge</li>
+        <li><span class="feat-check"><i data-lucide="check"></i></span>Exclusive resources</li>
+      </ul>
+
+      <button class="btn-cta" id="btnMonthly">
+        <i data-lucide="zap"></i>Get Monthly
+      </button>
+    </div>
+
+    <!-- Yearly -->
+    <div class="plan popular" id="planYearly">
+      <div class="pop-badge">⭐ Best Value</div>
+      <div class="plan-icon icon-yearly"><i data-lucide="crown"></i></div>
+      <div class="plan-name">Yearly</div>
+      <div class="price-row">
+        <div class="price" id="priceYearly">$39.99</div>
+        <div class="price-per" id="pricePerYearly">/ yr</div>
+      </div>
+      <div class="savings-pill" id="savingsPill"><i data-lucide="trending-down"></i>Save 33% · Only $3.33/mo</div>
+
+      <div class="divider"></div>
+
+      <ul class="features">
+        <li><span class="feat-check"><i data-lucide="check"></i></span>Unlimited AI messages</li>
+        <li><span class="feat-check"><i data-lucide="check"></i></span>Unlimited uploads &amp; downloads</li>
+        <li><span class="feat-check"><i data-lucide="check"></i></span>Ad-free experience</li>
+        <li><span class="feat-check"><i data-lucide="check"></i></span>Priority in group chat</li>
+        <li><span class="feat-check"><i data-lucide="check"></i></span>VIP member badge</li>
+        <li><span class="feat-check"><i data-lucide="check"></i></span>Exclusive resources</li>
+      </ul>
+
+      <button class="btn-cta" id="btnYearly">
+        <i data-lucide="crown"></i>Get Yearly — Best Value
+      </button>
+    </div>
+
+  </div>
+
+  <!-- Social proof -->
+  <div class="social-section">
+    <div class="social-label">Loved by students</div>
+    <div class="testimonials">
+      <div class="tcard">
+        <div class="tcard-stars">★★★★★</div>
+        <div class="tcard-text">"The AI assistant alone is worth it. Explained calculus better than my professor."</div>
+        <div class="tcard-user">— Marcus T., Engineering</div>
+      </div>
+      <div class="tcard">
+        <div class="tcard-stars">★★★★★</div>
+        <div class="tcard-text">"Yearly plan was a no-brainer. I use it every single day for study notes."</div>
+        <div class="tcard-user">— Priya S., Pre-med</div>
+      </div>
+      <div class="tcard">
+        <div class="tcard-stars">★★★★★</div>
+        <div class="tcard-text">"The VIP badge and unlimited uploads make collaboration so much easier."</div>
+        <div class="tcard-user">— Jordan K., Business</div>
+      </div>
+    </div>
+
+    <!-- Trust badges -->
+    <div class="trust">
+      <div class="trust-item"><i data-lucide="shield-check"></i>Secure checkout via Stripe</div>
+      <div class="trust-item"><i data-lucide="refresh-cw"></i>Cancel anytime</div>
+      <div class="trust-item"><i data-lucide="lock"></i>No hidden fees</div>
+      <div class="trust-item"><i data-lucide="clock"></i>Instant activation</div>
+    </div>
+  </div>
+
+  <!-- FAQ -->
+  <div class="faq-section">
+    <div class="faq-title">Frequently Asked Questions</div>
+
+    <div class="faq-item">
+      <div class="faq-q">Can I cancel anytime?<i data-lucide="plus"></i></div>
+      <div class="faq-a">Yes — cancel from your settings any time. You keep access until the end of your billing period. No questions asked.</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q">What happens when I upgrade?<i data-lucide="plus"></i></div>
+      <div class="faq-a">Premium activates instantly the moment payment goes through. Your VIP badge, unlimited AI, and all perks are live immediately.</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q">Is the yearly plan cheaper?<i data-lucide="plus"></i></div>
+      <div class="faq-a">Absolutely — the yearly plan works out to $3.33/month vs $4.99/month, saving you 33% over paying monthly.</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q">Is my payment info secure?<i data-lucide="plus"></i></div>
+      <div class="faq-a">All payments are processed by Stripe, one of the world's most trusted payment platforms. StudyFlow never sees your card details.</div>
+    </div>
+  </div>
+
+</main>
+
+<script>
+const MONTHLY_URL = "https://buy.stripe.com/test_8x24gzc1E6sv65A4EXdwc02";
+const YEARLY_URL  = "https://buy.stripe.com/test_9B614n5DgaILalQdbtdwc03";
+
+// ── BILLING TOGGLE ──
+let isYearly = false;
+const toggle = document.getElementById("billingToggle");
+
+toggle.addEventListener("click", () => {
+  isYearly = !isYearly;
+  toggle.classList.toggle("on", isYearly);
+  syncPricing();
+});
+
+function syncPricing(){
+  const monthly = document.getElementById("priceMonthly");
+  const equiv   = document.getElementById("equivMonthly");
+
+  if(isYearly){
+    monthly.textContent = "$3.33";
+    equiv.textContent   = "Billed $39.99 annually";
+  } else {
+    monthly.textContent = "$4.99";
+    equiv.textContent   = "";
+  }
+}
+
+// ── CTA BUTTONS ──
+document.getElementById("btnMonthly").addEventListener("click", () => {
+  window.location.href = MONTHLY_URL;
+});
+
+document.getElementById("btnYearly").addEventListener("click", () => {
+  window.location.href = YEARLY_URL;
+});
+
+// ── FAQ ACCORDION ──
+document.querySelectorAll(".faq-q").forEach(q => {
+  q.addEventListener("click", () => {
+    const item = q.parentElement;
+    const wasOpen = item.classList.contains("open");
+    document.querySelectorAll(".faq-item").forEach(i => i.classList.remove("open"));
+    if(!wasOpen) item.classList.add("open");
+  });
+});
+
+lucide.createIcons();
+</script>
+
+<script>
+(function(){
+  const ham=document.getElementById('hamburger');
+  const sidebar=document.getElementById('sidebar');
+  const overlay=document.getElementById('navOverlay');
+  function openNav(){sidebar.classList.add('open');overlay.classList.add('open');ham.innerHTML='<i data-lucide="x"></i>';lucide.createIcons();}
+  function closeNav(){sidebar.classList.remove('open');overlay.classList.remove('open');ham.innerHTML='<i data-lucide="menu"></i>';lucide.createIcons();}
+  ham.addEventListener('click',()=>sidebar.classList.contains('open')?closeNav():openNav());
+  overlay.addEventListener('click',closeNav);
+  document.querySelectorAll('.nav-item').forEach(a=>a.addEventListener('click',()=>{if(window.innerWidth<=768)closeNav();}));
+})();
+if('serviceWorker' in navigator) navigator.serviceWorker.register('/sw.js').catch(()=>{});
+</script>
+</body>
+</html>

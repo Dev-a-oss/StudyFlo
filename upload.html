@@ -1,0 +1,653 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<meta name="theme-color" content="#4f46e5"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<link rel="manifest" href="/manifest.json"/>
+<link rel="apple-touch-icon" href="/icons/icon-192.png"/>
+<title>StudyFlow • Upload Material</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/lucide@latest"></script>
+<style>
+:root{
+  --primary:#818cf8;--primary-deep:#4f46e5;--primary-glow:rgba(129,140,248,.22);
+  --bg:#080a12;--sidebar:#0b0d17;--surface:#0d0f1a;
+  --card:rgba(255,255,255,.04);--card-border:rgba(255,255,255,.08);--border:rgba(255,255,255,.07);
+  --txt:#eef0ff;--txt-muted:#5a6480;--txt-dim:#2e3450;
+  --green:#34d399;--amber:#fbbf24;--red:#f87171;
+}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+html,body{height:100%;overflow:hidden;}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--txt);display:flex;}
+body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
+  background:radial-gradient(ellipse 60% 50% at 15% 0%,rgba(79,70,229,.13) 0%,transparent 60%),
+             radial-gradient(ellipse 50% 40% at 85% 100%,rgba(109,40,217,.09) 0%,transparent 60%);}
+
+/* ── SIDEBAR ── */
+nav{width:250px;min-width:250px;background:var(--sidebar);border-right:1px solid var(--border);display:flex;flex-direction:column;height:100vh;position:relative;z-index:10;}
+nav::after{content:'';position:absolute;top:0;right:0;width:1px;height:100%;background:linear-gradient(to bottom,transparent,var(--primary-glow) 40%,var(--primary-glow) 60%,transparent);pointer-events:none;}
+.logo{font-family:'Syne',sans-serif;font-size:1.45rem;font-weight:800;letter-spacing:-.03em;display:flex;align-items:center;gap:9px;padding:1.75rem 1.4rem;text-decoration:none;border-bottom:1px solid var(--border);}
+.logo i{width:20px;height:20px;color:var(--primary);filter:drop-shadow(0 0 6px var(--primary));}
+.logo-text{background:linear-gradient(110deg,#fff 20%,var(--primary) 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.nav-scroll{flex:1;overflow-y:auto;padding:.8rem .7rem 1rem;}
+.nav-scroll::-webkit-scrollbar{width:3px;}
+.nav-scroll::-webkit-scrollbar-thumb{background:rgba(255,255,255,.07);border-radius:3px;}
+.nav-label{font-size:.62rem;font-weight:700;text-transform:uppercase;letter-spacing:.13em;color:var(--txt-dim);padding:.9rem 12px .35rem;user-select:none;}
+.nav-item{display:flex;align-items:center;gap:10px;padding:10px 12px;text-decoration:none;color:var(--txt-muted);font-size:.855rem;font-weight:500;border-radius:10px;margin-bottom:2px;transition:background .16s,color .16s;position:relative;}
+.nav-item i{width:15px;height:15px;flex-shrink:0;}
+.nav-item:hover{background:rgba(129,140,248,.08);color:var(--txt);}
+.nav-item.active{background:rgba(129,140,248,.13);color:var(--primary);}
+.nav-item.active::before{content:'';position:absolute;left:0;top:22%;bottom:22%;width:3px;background:var(--primary);border-radius:0 3px 3px 0;box-shadow:0 0 8px var(--primary);}
+.chip{margin-left:auto;background:rgba(129,140,248,.15);color:var(--primary);font-size:.6rem;font-weight:700;padding:2px 6px;border-radius:20px;}
+
+/* ── MAIN ── */
+main{flex:1;display:flex;flex-direction:column;height:100vh;overflow:hidden;position:relative;z-index:1;}
+.topbar{padding:1.1rem 2rem;border-bottom:1px solid var(--border);background:rgba(8,10,18,.88);backdrop-filter:blur(20px);display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}
+.topbar-left .topbar-greet{font-size:.75rem;color:var(--txt-muted);margin-bottom:2px;}
+.topbar-left .topbar-title{font-family:'Syne',sans-serif;font-size:1.5rem;font-weight:800;letter-spacing:-.03em;}
+.topbar-right{display:flex;align-items:center;gap:.6rem;}
+.icon-btn{width:36px;height:36px;border-radius:10px;border:1px solid var(--border);background:var(--card);color:var(--txt-muted);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .16s;text-decoration:none;}
+.icon-btn i{width:16px;height:16px;}
+.icon-btn:hover{border-color:rgba(129,140,248,.3);color:var(--primary);}
+.content{flex:1;overflow-y:auto;padding:2rem;}
+.content::-webkit-scrollbar{width:4px;}
+.content::-webkit-scrollbar-thumb{background:rgba(255,255,255,.07);border-radius:4px;}
+
+/* ── UPLOAD CARD ── */
+.upload-card{max-width:700px;margin:0 auto;background:var(--card);border:1px solid var(--card-border);border-radius:20px;padding:2.5rem;box-shadow:0 8px 40px rgba(0,0,0,.3);}
+.upload-card-header{display:flex;align-items:center;gap:14px;margin-bottom:1.5rem;}
+.upload-icon-wrap{width:48px;height:48px;border-radius:14px;background:rgba(129,140,248,.12);border:1px solid rgba(129,140,248,.2);display:flex;align-items:center;justify-content:center;color:var(--primary);flex-shrink:0;}
+.upload-icon-wrap i{width:22px;height:22px;}
+.upload-card-title{font-family:'Syne',sans-serif;font-size:1.25rem;font-weight:800;letter-spacing:-.02em;}
+.upload-card-sub{font-size:.8rem;color:var(--txt-muted);margin-top:3px;}
+
+/* Storage badge */
+.storage-badge{
+  display:inline-flex;align-items:center;gap:5px;
+  font-size:.7rem;font-weight:600;padding:3px 9px;border-radius:20px;margin-bottom:1.2rem;
+}
+.storage-badge.cloudinary{background:rgba(52,211,153,.1);border:1px solid rgba(52,211,153,.25);color:var(--green);}
+.storage-badge.firebase{background:rgba(251,191,36,.1);border:1px solid rgba(251,191,36,.25);color:var(--amber);}
+.storage-badge i{width:12px;height:12px;}
+
+/* Drop Zone */
+.drop-zone{border:2px dashed rgba(129,140,248,.25);border-radius:16px;padding:2.2rem 1.5rem;text-align:center;cursor:pointer;transition:all .2s;background:rgba(129,140,248,.03);position:relative;margin-bottom:1.2rem;}
+.drop-zone:hover,.drop-zone.dragover{border-color:var(--primary);background:rgba(129,140,248,.08);}
+.drop-zone input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%;}
+.dz-icon{width:40px;height:40px;color:var(--primary);opacity:.7;margin:0 auto .7rem;}
+.dz-title{font-family:'Syne',sans-serif;font-size:1rem;font-weight:700;margin-bottom:.35rem;}
+.dz-sub{font-size:.76rem;color:var(--txt-muted);}
+.dz-sub span{color:var(--primary);font-weight:600;}
+.dz-types{display:flex;flex-wrap:wrap;justify-content:center;gap:.3rem;margin-top:.8rem;}
+.dz-type-chip{font-size:.65rem;padding:2px 7px;border-radius:6px;background:rgba(255,255,255,.05);color:var(--txt-muted);border:1px solid var(--border);}
+
+/* File chip */
+.file-chip{display:none;align-items:center;gap:10px;background:rgba(129,140,248,.1);border:1px solid rgba(129,140,248,.2);border-radius:12px;padding:.65rem 1rem;margin-bottom:1.2rem;}
+.file-chip.show{display:flex;}
+.file-chip-icon{color:var(--primary);}
+.file-chip-icon i{width:18px;height:18px;}
+.file-chip-info{flex:1;overflow:hidden;}
+.file-chip-name{font-size:.85rem;font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.file-chip-meta{font-size:.7rem;color:var(--txt-muted);margin-top:2px;}
+.file-chip-remove{background:none;border:none;color:var(--txt-muted);cursor:pointer;padding:2px;display:flex;transition:color .15s;flex-shrink:0;}
+.file-chip-remove:hover{color:var(--red);}
+.file-chip-remove i{width:15px;height:15px;}
+
+/* Form */
+.form-group{margin-bottom:1.1rem;}
+.form-label{display:block;font-size:.76rem;font-weight:600;color:var(--txt-muted);text-transform:uppercase;letter-spacing:.07em;margin-bottom:.45rem;}
+.form-input,.form-select,.form-textarea{width:100%;background:rgba(255,255,255,.04);border:1px solid var(--card-border);border-radius:12px;padding:.72rem 1rem;color:var(--txt);font-family:'DM Sans',sans-serif;font-size:.88rem;transition:border-color .16s,box-shadow .16s;outline:none;}
+.form-input::placeholder,.form-textarea::placeholder{color:var(--txt-dim);}
+.form-input:focus,.form-select:focus,.form-textarea:focus{border-color:rgba(129,140,248,.5);box-shadow:0 0 0 3px rgba(129,140,248,.1);}
+.form-select{cursor:pointer;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%235a6480' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 1rem center;}
+.form-select option{background:#0d0f1a;color:var(--txt);}
+.form-textarea{resize:vertical;min-height:80px;}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:1rem;}
+.req{color:var(--red);}
+.opt{color:var(--txt-dim);}
+
+/* Progress */
+.progress-wrap{display:none;margin-bottom:1.1rem;}
+.progress-wrap.show{display:block;}
+.progress-top{display:flex;justify-content:space-between;align-items:center;font-size:.75rem;color:var(--txt-muted);margin-bottom:.4rem;}
+.progress-bar-bg{height:6px;background:rgba(255,255,255,.06);border-radius:6px;overflow:hidden;}
+.progress-bar-fill{height:100%;width:0%;border-radius:6px;transition:width .25s;background:linear-gradient(90deg,var(--primary-deep),var(--primary));}
+.progress-bar-fill.green{background:linear-gradient(90deg,#059669,var(--green));}
+
+/* Upload button */
+.btn-upload{width:100%;padding:.95rem;border:none;border-radius:14px;cursor:pointer;background:linear-gradient(135deg,var(--primary-deep),#6d28d9);color:#fff;font-family:'Syne',sans-serif;font-size:.95rem;font-weight:700;letter-spacing:.02em;transition:all .2s;box-shadow:0 4px 20px rgba(79,70,229,.35);display:flex;align-items:center;justify-content:center;gap:8px;}
+.btn-upload:hover:not(:disabled){transform:translateY(-2px);box-shadow:0 8px 28px rgba(79,70,229,.5);}
+.btn-upload:disabled{opacity:.5;cursor:not-allowed;transform:none;}
+.btn-upload i{width:18px;height:18px;}
+
+/* Success */
+.success-state{display:none;flex-direction:column;align-items:center;text-align:center;padding:1.5rem 1rem;gap:.9rem;}
+.success-state.show{display:flex;}
+.success-circle{width:72px;height:72px;border-radius:50%;background:rgba(52,211,153,.12);border:2px solid rgba(52,211,153,.3);display:flex;align-items:center;justify-content:center;color:var(--green);animation:popIn .4s cubic-bezier(.4,0,.2,1);}
+.success-circle i{width:32px;height:32px;}
+@keyframes popIn{from{transform:scale(.5);opacity:0}to{transform:scale(1);opacity:1}}
+.success-title{font-family:'Syne',sans-serif;font-size:1.25rem;font-weight:800;}
+.success-sub{font-size:.83rem;color:var(--txt-muted);max-width:400px;}
+.redirect-note{font-size:.72rem;color:var(--txt-dim);}
+.success-btns{display:flex;gap:.8rem;flex-wrap:wrap;justify-content:center;margin-top:.4rem;}
+.btn-outline{padding:.62rem 1.3rem;border-radius:12px;border:1px solid var(--card-border);background:var(--card);color:var(--txt-muted);font-family:'Syne',sans-serif;font-size:.82rem;font-weight:700;cursor:pointer;text-decoration:none;transition:all .16s;display:flex;align-items:center;gap:6px;}
+.btn-outline:hover{border-color:rgba(129,140,248,.3);color:var(--primary);}
+.btn-primary-sm{padding:.62rem 1.3rem;border-radius:12px;border:none;background:linear-gradient(135deg,var(--primary-deep),#6d28d9);color:#fff;font-family:'Syne',sans-serif;font-size:.82rem;font-weight:700;cursor:pointer;text-decoration:none;transition:all .16s;display:flex;align-items:center;gap:6px;box-shadow:0 3px 14px rgba(79,70,229,.4);}
+.btn-primary-sm:hover{transform:translateY(-1px);}
+
+/* Toast */
+.toast{position:fixed;bottom:1.5rem;right:1.5rem;z-index:999;padding:.8rem 1.2rem;border-radius:14px;font-size:.85rem;font-weight:500;display:flex;align-items:center;gap:.6rem;transform:translateY(80px);opacity:0;transition:all .3s cubic-bezier(.4,0,.2,1);pointer-events:none;box-shadow:0 8px 30px rgba(0,0,0,.4);}
+.toast.show{transform:translateY(0);opacity:1;}
+.toast.success{background:rgba(52,211,153,.15);border:1px solid rgba(52,211,153,.3);color:var(--green);}
+.toast.error{background:rgba(248,113,113,.15);border:1px solid rgba(248,113,113,.3);color:var(--red);}
+.toast i{width:16px;height:16px;flex-shrink:0;}
+
+/* Mobile */
+.hamburger{display:none;position:fixed;top:14px;left:14px;z-index:200;width:40px;height:40px;border-radius:10px;background:rgba(13,15,26,.92);backdrop-filter:blur(12px);border:1px solid var(--border);color:var(--txt);align-items:center;justify-content:center;cursor:pointer;box-shadow:0 2px 12px rgba(0,0,0,.4);}
+.hamburger i{width:18px;height:18px;}
+.nav-overlay{display:none;position:fixed;inset:0;z-index:99;background:rgba(0,0,0,.6);backdrop-filter:blur(3px);}
+.nav-overlay.open{display:block;}
+@media(max-width:768px){
+  .hamburger{display:flex;}
+  nav{position:fixed;top:0;left:0;height:100vh;z-index:100;transform:translateX(-100%);transition:transform .28s cubic-bezier(.4,0,.2,1);box-shadow:4px 0 40px rgba(0,0,0,.6);}
+  nav.open{transform:translateX(0);}
+  main{width:100%;}
+  .topbar{padding:1rem 1rem 1rem 62px;}
+  .content{padding:1rem;}
+  .form-row{grid-template-columns:1fr;}
+  .upload-card{padding:1.4rem;}
+}
+</style>
+</head>
+<body>
+
+<button class="hamburger" id="hamburger" aria-label="Open menu"><i data-lucide="menu"></i></button>
+<div class="nav-overlay" id="navOverlay"></div>
+
+<!-- SIDEBAR -->
+<nav id="sidebar">
+  <a href="index.html" class="logo">
+    <i data-lucide="zap"></i><span class="logo-text">StudyFlow</span>
+  </a>
+  <div class="nav-scroll">
+    <div class="nav-label">Menu</div>
+    <a href="index.html"     class="nav-item"><i data-lucide="layout-dashboard"></i>Dashboard</a>
+    <a href="resources.html" class="nav-item"><i data-lucide="file-up"></i>Resources</a>
+    <a href="upload.html"    class="nav-item active"><i data-lucide="plus-circle"></i>Upload Material</a>
+    <a href="community.html" class="nav-item"><i data-lucide="users"></i>Community</a>
+    <div class="nav-label">Support</div>
+    <a href="faq.html"       class="nav-item"><i data-lucide="help-circle"></i>FAQ</a>
+    <a href="terms.html"     class="nav-item"><i data-lucide="file-text"></i>Terms</a>
+    <a href="chat.html"      class="nav-item"><i data-lucide="message-circle"></i>Group Chat</a>
+    <div class="nav-label">Account</div>
+    <a href="profile.html"   class="nav-item"><i data-lucide="user"></i>My Profile</a>
+    <a href="assistant.html" class="nav-item"><i data-lucide="bot"></i>AI Assistant</a>
+    <a href="premium.html"   class="nav-item"><i data-lucide="crown"></i>Go Premium<span class="chip">NEW</span></a>
+    <a href="settings.html"  class="nav-item"><i data-lucide="settings"></i>Settings</a>
+  </div>
+</nav>
+
+<!-- MAIN -->
+<main>
+  <div class="topbar">
+    <div class="topbar-left">
+      <div class="topbar-greet">Share your knowledge</div>
+      <div class="topbar-title">Upload Material</div>
+    </div>
+    <div class="topbar-right">
+      <a href="resources.html" class="icon-btn" title="View Resources"><i data-lucide="library"></i></a>
+      <a href="settings.html"  class="icon-btn" title="Settings"><i data-lucide="settings"></i></a>
+    </div>
+  </div>
+
+  <div class="content">
+    <div class="upload-card">
+
+      <div class="upload-card-header">
+        <div class="upload-icon-wrap"><i data-lucide="upload-cloud"></i></div>
+        <div>
+          <div class="upload-card-title">Upload Study Material</div>
+          <div class="upload-card-sub">Share notes, PDFs, slides or any resource with the community</div>
+        </div>
+      </div>
+
+      <!-- Dynamic storage badge — updates when file is selected -->
+      <div class="storage-badge cloudinary" id="storageBadge">
+        <i data-lucide="cloud"></i>
+        <span id="storageBadgeText">Images &amp; videos → Cloudinary · Docs &amp; PDFs → Firebase</span>
+      </div>
+
+      <div id="uploadForm">
+
+        <!-- Drop zone -->
+        <div class="drop-zone" id="dropZone">
+          <input type="file" id="fileInput"
+            accept=".pdf,.doc,.docx,.ppt,.pptx,.xls,.xlsx,.txt,.csv,
+                    .png,.jpg,.jpeg,.gif,.webp,.svg,
+                    .mp4,.mov,.avi,.webm,
+                    .mp3,.wav,
+                    .zip,.rar"/>
+          <i data-lucide="upload-cloud" class="dz-icon"></i>
+          <div class="dz-title">Drop your file here</div>
+          <div class="dz-sub">or <span>click to browse</span></div>
+          <div class="dz-types">
+            <span class="dz-type-chip">PDF</span>
+            <span class="dz-type-chip">DOC</span>
+            <span class="dz-type-chip">PPT</span>
+            <span class="dz-type-chip">XLS</span>
+            <span class="dz-type-chip">Images</span>
+            <span class="dz-type-chip">Video</span>
+            <span class="dz-type-chip">Audio</span>
+            <span class="dz-type-chip">ZIP</span>
+          </div>
+        </div>
+
+        <!-- File chip -->
+        <div class="file-chip" id="fileChip">
+          <span class="file-chip-icon"><i data-lucide="file" id="chipIcon"></i></span>
+          <div class="file-chip-info">
+            <div class="file-chip-name" id="chipName">—</div>
+            <div class="file-chip-meta" id="chipMeta">—</div>
+          </div>
+          <button class="file-chip-remove" id="removeFile" title="Remove"><i data-lucide="x"></i></button>
+        </div>
+
+        <!-- Title -->
+        <div class="form-group">
+          <label class="form-label" for="titleInput">Title <span class="req">*</span></label>
+          <input class="form-input" id="titleInput" type="text"
+            placeholder="e.g. Chapter 5 — Calculus Notes" maxlength="120"/>
+        </div>
+
+        <!-- Subject + Category -->
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label" for="subjectInput">Subject <span class="opt">(optional)</span></label>
+            <input class="form-input" id="subjectInput" type="text" placeholder="e.g. Mathematics"/>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="categorySelect">Category <span class="opt">(optional)</span></label>
+            <select class="form-select" id="categorySelect">
+              <option value="">Select category</option>
+              <option value="Notes">Notes</option>
+              <option value="Past Paper">Past Paper</option>
+              <option value="Slides">Slides</option>
+              <option value="Assignment">Assignment</option>
+              <option value="Textbook">Textbook</option>
+              <option value="Tutorial">Tutorial</option>
+              <option value="Video">Video</option>
+              <option value="Audio">Audio</option>
+              <option value="Other">Other</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Description -->
+        <div class="form-group">
+          <label class="form-label" for="descInput">Description <span class="opt">(optional)</span></label>
+          <textarea class="form-textarea" id="descInput"
+            placeholder="Briefly describe what this material covers…"></textarea>
+        </div>
+
+        <!-- Progress bar -->
+        <div class="progress-wrap" id="progressWrap">
+          <div class="progress-top">
+            <span id="progressLabel">Uploading…</span>
+            <span id="progressPct">0%</span>
+          </div>
+          <div class="progress-bar-bg">
+            <div class="progress-bar-fill" id="progressFill"></div>
+          </div>
+        </div>
+
+        <!-- Upload button -->
+        <button class="btn-upload" id="uploadBtn" disabled>
+          <i data-lucide="upload-cloud"></i>
+          <span id="uploadBtnText">Select a file to upload</span>
+        </button>
+
+      </div><!-- /uploadForm -->
+
+      <!-- Success state -->
+      <div class="success-state" id="successState">
+        <div class="success-circle"><i data-lucide="check"></i></div>
+        <div class="success-title">Upload Complete! 🎉</div>
+        <div class="success-sub" id="successSub">Your file has been shared with the community.</div>
+        <div class="redirect-note">Redirecting to Resources in 3 seconds…</div>
+        <div class="success-btns">
+          <button class="btn-outline" id="uploadAnotherBtn">
+            <i data-lucide="plus"></i>Upload Another
+          </button>
+          <a href="resources.html" class="btn-primary-sm">
+            <i data-lucide="library"></i>View Resources Now
+          </a>
+        </div>
+      </div>
+
+    </div><!-- /upload-card -->
+  </div><!-- /content -->
+</main>
+
+<!-- Toast -->
+<div class="toast" id="toast">
+  <i data-lucide="info"></i>
+  <span id="toastMsg">—</span>
+</div>
+
+<script type="module">
+import { initializeApp }        from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+import { getFirestore, collection, addDoc, serverTimestamp }
+  from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+import { getStorage, ref, uploadBytesResumable, getDownloadURL }
+  from "https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js";
+
+/* ── CONFIG ── */
+const FB_CONFIG = {
+  apiKey:"AIzaSyA-4YyVROZz-OIAGTWhpMMpuJe2Xag9Fig",
+  authDomain:"vibe-jolt.firebaseapp.com",
+  projectId:"vibe-jolt",
+  storageBucket:"vibe-jolt.appspot.com",
+  messagingSenderId:"386156754842",
+  appId:"1:386156754842:web:8b5e45a3c7f20ac9616c23"
+};
+
+// Cloudinary config
+const CLD_CLOUD   = "dllaxu3id";
+const CLD_PRESET  = "vibe_jolt_preset";
+const CLD_UPLOAD_URL = `https://api.cloudinary.com/v1_1/${CLD_CLOUD}/auto/upload`;
+
+/* ── INIT ── */
+const app     = initializeApp(FB_CONFIG);
+const auth    = getAuth(app);
+const db      = getFirestore(app);
+const storage = getStorage(app);
+
+let currentUser  = null;
+let selectedFile = null;
+
+/* ── AUTH GUARD ── */
+onAuthStateChanged(auth, user => {
+  if(!user){ window.location.href = 'auth.html'; return; }
+  currentUser = user;
+});
+
+/* ── HELPERS ── */
+const G = id => document.getElementById(id);
+
+// Which files go to Cloudinary vs Firebase Storage
+// Cloudinary: images, videos, audio (they optimise & stream these perfectly)
+// Firebase:   documents, PDFs, ZIPs, spreadsheets, presentations
+const CLD_TYPES = [
+  'image/','video/','audio/'
+];
+function usesCloudinary(file){
+  return CLD_TYPES.some(t => file.type.startsWith(t));
+}
+
+function getFileIcon(file){
+  if(file.type.startsWith('image/'))  return 'image';
+  if(file.type.startsWith('video/'))  return 'video';
+  if(file.type.startsWith('audio/'))  return 'music';
+  if(file.type === 'application/pdf') return 'file-text';
+  if(file.type.includes('word'))      return 'file-text';
+  if(file.type.includes('sheet') || file.type.includes('excel')) return 'table';
+  if(file.type.includes('presentation') || file.type.includes('powerpoint')) return 'presentation';
+  if(file.type.includes('zip') || file.type.includes('rar')) return 'archive';
+  return 'file';
+}
+
+function formatSize(b){
+  if(b < 1024)        return b + ' B';
+  if(b < 1048576)     return (b/1024).toFixed(1) + ' KB';
+  return (b/1048576).toFixed(1) + ' MB';
+}
+
+function showToast(msg, type='success'){
+  const t = G('toast');
+  t.className = 'toast ' + type;
+  G('toastMsg').textContent = msg;
+  t.querySelector('i').setAttribute('data-lucide', type === 'success' ? 'check-circle' : 'alert-circle');
+  lucide.createIcons();
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 3500);
+}
+
+function updateStorageBadge(file){
+  const badge = G('storageBadge');
+  const text  = G('storageBadgeText');
+  if(!file){
+    badge.className = 'storage-badge cloudinary';
+    text.textContent = 'Images & videos → Cloudinary · Docs & PDFs → Firebase';
+    return;
+  }
+  if(usesCloudinary(file)){
+    badge.className = 'storage-badge cloudinary';
+    text.textContent = '✦ This file will be stored on Cloudinary';
+  } else {
+    badge.className = 'storage-badge firebase';
+    text.textContent = '✦ This file will be stored on Firebase Storage';
+  }
+  lucide.createIcons();
+}
+
+/* ── FILE SELECTION ── */
+function setFile(file){
+  selectedFile = file;
+  G('chipIcon').setAttribute('data-lucide', getFileIcon(file));
+  G('chipName').textContent = file.name;
+  G('chipMeta').textContent = formatSize(file.size) + ' · ' + (file.type || 'unknown type');
+  G('fileChip').classList.add('show');
+  G('uploadBtn').disabled = false;
+  G('uploadBtnText').textContent = 'Upload "' + file.name.slice(0,38) + (file.name.length>38?'…':'"');
+  updateStorageBadge(file);
+  lucide.createIcons();
+}
+
+function clearFile(){
+  selectedFile = null;
+  G('fileInput').value    = '';
+  G('fileChip').classList.remove('show');
+  G('uploadBtn').disabled = true;
+  G('uploadBtnText').textContent = 'Select a file to upload';
+  updateStorageBadge(null);
+}
+
+G('fileInput').addEventListener('change', e => {
+  if(e.target.files[0]) setFile(e.target.files[0]);
+});
+
+/* ── DRAG & DROP ── */
+const dz = G('dropZone');
+['dragenter','dragover'].forEach(ev => dz.addEventListener(ev, e => {
+  e.preventDefault(); dz.classList.add('dragover');
+}));
+['dragleave','drop'].forEach(ev => dz.addEventListener(ev, e => {
+  e.preventDefault(); dz.classList.remove('dragover');
+}));
+dz.addEventListener('drop', e => {
+  const f = e.dataTransfer.files[0];
+  if(f) setFile(f);
+});
+
+G('removeFile').addEventListener('click', clearFile);
+
+/* ── CLOUDINARY UPLOAD ── */
+async function uploadToCloudinary(file, onProgress){
+  return new Promise((resolve, reject) => {
+    const fd = new FormData();
+    fd.append('file',            file);
+    fd.append('upload_preset',   CLD_PRESET);
+    fd.append('cloud_name',      CLD_CLOUD);
+    fd.append('folder',          'studyflow');
+
+    const xhr = new XMLHttpRequest();
+    xhr.open('POST', CLD_UPLOAD_URL);
+
+    xhr.upload.onprogress = e => {
+      if(e.lengthComputable) onProgress(Math.round(e.loaded/e.total*100));
+    };
+    xhr.onload = () => {
+      if(xhr.status === 200){
+        const res = JSON.parse(xhr.responseText);
+        resolve(res.secure_url);
+      } else {
+        reject(new Error('Cloudinary upload failed: ' + xhr.statusText));
+      }
+    };
+    xhr.onerror = () => reject(new Error('Network error during Cloudinary upload'));
+    xhr.send(fd);
+  });
+}
+
+/* ── FIREBASE STORAGE UPLOAD ── */
+async function uploadToFirebase(file, uid, onProgress){
+  return new Promise((resolve, reject) => {
+    const safeName    = file.name.replace(/[^a-zA-Z0-9._-]/g,'_');
+    const storagePath = `materials/${uid}/${Date.now()}_${safeName}`;
+    const sRef        = ref(storage, storagePath);
+    const task        = uploadBytesResumable(sRef, file);
+
+    task.on('state_changed',
+      snap => onProgress(Math.round(snap.bytesTransferred/snap.totalBytes*100)),
+      err  => reject(err),
+      async () => resolve(await getDownloadURL(task.snapshot.ref))
+    );
+  });
+}
+
+/* ── MAIN UPLOAD HANDLER ── */
+G('uploadBtn').addEventListener('click', async () => {
+  if(!selectedFile){ showToast('Please select a file first.', 'error'); return; }
+  if(!currentUser){  showToast('You must be logged in.',       'error'); return; }
+
+  const title = G('titleInput').value.trim();
+  if(!title){ showToast('Please add a title.', 'error'); G('titleInput').focus(); return; }
+
+  // 100MB max for Cloudinary (images/video), 50MB for Firebase docs
+  const maxSize = usesCloudinary(selectedFile) ? 100*1024*1024 : 50*1024*1024;
+  if(selectedFile.size > maxSize){
+    showToast(`File too large. Max ${usesCloudinary(selectedFile)?'100MB':'50MB'}.`, 'error');
+    return;
+  }
+
+  // Disable button + show progress
+  const btn = G('uploadBtn');
+  btn.disabled = true;
+  btn.innerHTML = '<i data-lucide="loader"></i><span>Uploading…</span>';
+  lucide.createIcons();
+  G('progressWrap').classList.add('show');
+
+  const fill  = G('progressFill');
+  const label = G('progressLabel');
+  const pct   = G('progressPct');
+
+  function onProgress(p){
+    fill.style.width  = p + '%';
+    pct.textContent   = p + '%';
+    label.textContent = p < 100 ? 'Uploading…' : 'Saving to database…';
+    if(p === 100) fill.classList.add('green');
+  }
+
+  try {
+    let fileUrl;
+    let storageProvider;
+
+    if(usesCloudinary(selectedFile)){
+      // ── Upload to Cloudinary ──
+      storageProvider = 'cloudinary';
+      label.textContent = 'Uploading to Cloudinary…';
+      fileUrl = await uploadToCloudinary(selectedFile, onProgress);
+    } else {
+      // ── Upload to Firebase Storage ──
+      storageProvider = 'firebase';
+      label.textContent = 'Uploading to Firebase Storage…';
+      fileUrl = await uploadToFirebase(selectedFile, currentUser.uid, onProgress);
+    }
+
+    // ── Save metadata to Firestore ──
+    label.textContent = 'Saving…';
+    await addDoc(collection(db, 'materials'), {
+      fileName:        selectedFile.name,
+      fileUrl:         fileUrl,
+      title:           title,
+      subject:         G('subjectInput').value.trim()   || '',
+      category:        G('categorySelect').value         || '',
+      description:     G('descInput').value.trim()       || '',
+      uploadedBy:      currentUser.email || currentUser.displayName || 'Anonymous',
+      uid:             currentUser.uid,
+      userId:          currentUser.uid,
+      uploaderEmail:   currentUser.email || '',
+      fileSize:        selectedFile.size,
+      fileType:        selectedFile.type,
+      storageProvider: storageProvider,   // 'cloudinary' or 'firebase'
+      timestamp:       serverTimestamp(),
+      createdAt:       serverTimestamp(),
+    });
+
+    // ── Show success ──
+    G('uploadForm').style.display = 'none';
+    G('successState').classList.add('show');
+    G('successSub').textContent =
+      '"' + title + '" has been shared with the community! ' +
+      '(Stored on ' + (storageProvider === 'cloudinary' ? 'Cloudinary' : 'Firebase') + ')';
+    lucide.createIcons();
+
+    // Auto-redirect to resources.html after 3 seconds
+    setTimeout(() => { window.location.href = 'resources.html'; }, 3000);
+
+  } catch(err){
+    console.error('Upload error:', err);
+    showToast('Upload failed: ' + err.message, 'error');
+    btn.disabled = false;
+    btn.innerHTML = '<i data-lucide="upload-cloud"></i><span>Try Again</span>';
+    G('progressWrap').classList.remove('show');
+    fill.style.width = '0%';
+    fill.classList.remove('green');
+    lucide.createIcons();
+  }
+});
+
+/* ── UPLOAD ANOTHER ── */
+G('uploadAnotherBtn').addEventListener('click', () => {
+  G('successState').classList.remove('show');
+  G('uploadForm').style.display = '';
+  G('progressWrap').classList.remove('show');
+  G('progressFill').style.width = '0%';
+  G('progressFill').classList.remove('green');
+  clearFile();
+  ['titleInput','subjectInput','descInput'].forEach(id => G(id).value = '');
+  G('categorySelect').value = '';
+  lucide.createIcons();
+});
+
+/* ── MOBILE SIDEBAR ── */
+(function(){
+  const ham     = G('hamburger');
+  const sidebar = G('sidebar');
+  const overlay = G('navOverlay');
+  function openNav(){
+    sidebar.classList.add('open');
+    overlay.classList.add('open');
+    ham.innerHTML = '<i data-lucide="x"></i>';
+    lucide.createIcons();
+  }
+  function closeNav(){
+    sidebar.classList.remove('open');
+    overlay.classList.remove('open');
+    ham.innerHTML = '<i data-lucide="menu"></i>';
+    lucide.createIcons();
+  }
+  ham.addEventListener('click', () => sidebar.classList.contains('open') ? closeNav() : openNav());
+  overlay.addEventListener('click', closeNav);
+  document.querySelectorAll('.nav-item').forEach(a =>
+    a.addEventListener('click', () => { if(window.innerWidth <= 768) closeNav(); })
+  );
+})();
+
+lucide.createIcons();
+</script>
+</body>
+</html>

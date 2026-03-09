@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>StudyFlow • Resources</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <link rel="stylesheet" href="style.css">
+
+  <style>
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: var(--card);
+      border-radius: 12px;
+      overflow: hidden;
+      border: 1px solid var(--border);
+      margin-top: 2rem;
+    }
+    th, td {
+      padding: 1rem;
+      text-align: left;
+      border-bottom: 1px solid var(--border);
+      vertical-align: middle;
+    }
+    th {
+      background: rgba(99,102,241,0.1);
+      font-weight: 600;
+    }
+    .preview {
+      width: 60px;
+      height: 60px;
+      object-fit: cover;
+      border-radius: 6px;
+      border: 1px solid var(--border);
+    }
+    .file-icon {
+      font-size: 2rem;
+      color: var(--primary);
+    }
+    .btn-delete {
+      background: var(--danger);
+      color: white;
+      border: none;
+      padding: 0.5rem 1rem;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.9rem;
+    }
+    .btn-delete:hover {
+      background: #dc2626;
+    }
+    .empty {
+      text-align: center;
+      padding: 4rem;
+      color: var(--text-sec);
+      font-size: 1.1rem;
+    }
+  </style>
+  <script>
+    if (localStorage.getItem('theme') === 'dark') document.documentElement.setAttribute('data-theme', 'dark');
+  </script>
+</head>
+<body>
+
+<nav>
+  <a href="index.html" class="logo"><i data-lucide="zap"></i> StudyFlow</a>
+  <div style="margin-top:1.5rem;">
+    <a href="index.html" class="nav-link"><i data-lucide="layout-dashboard"></i> Dashboard</a>
+    <a href="active_Study_Materials.html" class="nav-link active"><i data-lucide="file-up"></i> Resources</a>
+    <a href="community.html" class="nav-link"><i data-lucide="users"></i> Community</a>
+    <a href="chat.html" class="nav-link"><i data-lucide="message-circle"></i> Group Chat</a>
+    <a href="profile.html" class="nav-link"><i data-lucide="user"></i> My Profile</a>
+    <a href="settings.html" class="nav-link"><i data-lucide="settings"></i> Settings</a>
+  </div>
+</nav>
+
+<main>
+  <h1>Resources</h1>
+  <a href="upload.html" class="btn btn-primary">+ Add New</a>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Preview / File</th>
+        <th>Uploaded By</th>
+        <th>Action</th>
+      </tr>
+    </thead>
+    <tbody id="materialsBody">
+      <tr><td colspan="3" class="empty">Loading materials...</td></tr>
+    </tbody>
+  </table>
+</main>
+
+<script type="module">
+  import { db, currentUser, refreshIcons } from "./scripts.js";
+  import { collection, query, orderBy, onSnapshot, doc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+  let currentUid = null;
+
+  if (currentUser) {
+    currentUid = currentUser.uid;
+  }
+
+  const q = query(collection(db, "materials"), orderBy("timestamp", "desc"));
+
+  onSnapshot(q, snapshot => {
+    const tbody = document.getElementById('materialsBody');
+    tbody.innerHTML = "";
+
+    if (snapshot.empty) {
+      tbody.innerHTML = '<tr><td colspan="3" class="empty">No materials uploaded yet. Add your first one!</td></tr>';
+      return;
+    }
+
+    snapshot.forEach(docSnap => {
+      const d = docSnap.data();
+      const docId = docSnap.id;
+      const by = d.uploadedBy?.split('@')[0] || "Anonymous";
+      const url = d.fileUrl || "#";
+      const name = d.fileName || "Untitled";
+      const isOwner = currentUid && d.uid === currentUid;
+
+      let preview = "";
+      if (name.toLowerCase().match(/\.(png|jpg|jpeg)$/)) {
+        preview = `<img src="${url}" class="preview" alt="${name}" onerror="this.style.display='none';">`;
+      } else {
+        preview = `<span class="file-icon" data-lucide="file-text"></span>`;
+      }
+
+      let actionHtml = `<a href="${url}" target="_blank" rel="noopener noreferrer">Download</a>`;
+      if (isOwner) {
+        actionHtml += ` <button class="btn-delete" onclick="deleteFile('${docId}', '${name}')">Delete</button>`;
+      }
+
+      tbody.innerHTML += `
+        <tr>
+          <td style="display:flex; align-items:center; gap:12px;">
+            ${preview}
+            <span>${name}</span>
+          </td>
+          <td>${by}</td>
+          <td>${actionHtml}</td>
+        </tr>`;
+    });
+
+    refreshIcons();
+  });
+
+  window.deleteFile = async (docId, name) => {
+    if (!confirm(`Delete "${name}"? This cannot be undone.`)) return;
+
+    try {
+      await deleteDoc(doc(db, "materials", docId));
+      alert("Deleted successfully.");
+    } catch (err) {
+      alert("Delete failed: " + err.message);
+      console.error(err);
+    }
+  };
+
+  refreshIcons();
+</script>
+</body>
+</html>

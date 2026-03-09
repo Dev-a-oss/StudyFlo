@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>StudyFlow • Secure Checkout</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://js.stripe.com/v3/"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+      background: #f8fafc;
+      color: #1e293b;
+      margin: 0;
+      padding: 0;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+    .checkout-card {
+      background: white;
+      border-radius: 16px;
+      padding: 3rem;
+      max-width: 500px;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+      text-align: center;
+    }
+    h1 { font-size: 2.2rem; margin-bottom: 1.5rem; }
+    .price { font-size: 3rem; font-weight: 700; margin: 1rem 0; color: #6366f1; }
+    .details { margin: 2rem 0; text-align: left; }
+    .payment-buttons {
+      display: flex;
+      flex-direction: column;
+      gap: 1.2rem;
+      margin-top: 2rem;
+    }
+    .btn-pay {
+      padding: 1.2rem;
+      font-size: 1.2rem;
+      border-radius: 12px;
+      cursor: pointer;
+      border: none;
+    }
+    .btn-card { background: #6366f1; color: white; }
+    .btn-paypal { background: #ffc107; color: black; }
+    .secure { margin-top: 2rem; color: #64748b; font-size: 0.95rem; }
+  </style>
+</head>
+<body>
+
+<div class="checkout-card">
+  <h1>Secure Checkout</h1>
+
+  <div class="price" id="planPrice">$4.99 / month</div>
+
+  <div class="details">
+    <p><strong>Plan:</strong> <span id="planName">Monthly</span></p>
+    <p><strong>Features:</strong> Unlimited AI, uploads, ad-free, priority chat, exclusive resources</p>
+    <p><strong>Next payment:</strong> After 7-day free trial</p>
+  </div>
+
+  <div class="payment-buttons">
+    <button class="btn-pay btn-card" onclick="window.location.href='https://buy.stripe.com/test_8x24gzc1E6sv65A4EXdwc02'">
+      Pay with Credit / Debit Card
+    </button>
+    <button class="btn-pay btn-paypal" onclick="window.location.href='https://buy.stripe.com/test_9B614n5DgaILalQdbtdwc03'">
+      Pay with PayPal (Yearly plan)
+    </button>
+  </div>
+
+  <div class="secure">
+    🔒 Secure payment • Powered by Stripe • Cancel anytime
+  </div>
+</div>
+
+<script>
+  lucide.createIcons();
+
+  const urlParams = new URLSearchParams(window.location.search);
+  const plan = urlParams.get('plan') || 'monthly';
+
+  if (plan === 'yearly') {
+    document.getElementById('planPrice').textContent = '$39.99 / year';
+    document.getElementById('planName').textContent = 'Yearly (Save 33%)';
+  }
+</script>
+</body>
+</html>

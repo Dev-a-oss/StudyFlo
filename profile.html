@@ -1,0 +1,695 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>StudyFlow • My Profile</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/lucide@latest"></script>
+<style>
+:root{
+  --p:#818cf8;--pd:#4f46e5;--glow:rgba(129,140,248,.18);
+  --bg:#07090f;--sb:#0a0c16;--sf:#0d0f1a;
+  --card:rgba(255,255,255,.04);--cb:rgba(255,255,255,.08);--bd:rgba(255,255,255,.06);
+  --txt:#eef0ff;--mu:#5a6480;--dim:#1e2440;
+  --g:#34d399;--am:#fbbf24;--re:#f87171;--bl:#60a5fa;
+}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+html,body{height:100%;overflow:hidden;}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--txt);display:flex;}
+body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
+  background:radial-gradient(ellipse 55% 55% at 10% 0%,rgba(79,70,229,.14),transparent 60%),
+             radial-gradient(ellipse 40% 40% at 90% 100%,rgba(99,40,217,.1),transparent 55%);}
+
+/* SIDEBAR */
+nav{width:248px;min-width:248px;background:var(--sb);border-right:1px solid var(--bd);
+    display:flex;flex-direction:column;height:100vh;position:fixed;top:0;left:0;z-index:100;
+    transition:transform .28s cubic-bezier(.4,0,.2,1);}
+nav::after{content:'';position:absolute;top:0;right:0;width:1px;height:100%;
+  background:linear-gradient(to bottom,transparent,var(--glow) 40%,var(--glow) 60%,transparent);pointer-events:none;}
+.logo{font-family:'Syne',sans-serif;font-size:1.4rem;font-weight:800;letter-spacing:-.03em;
+  display:flex;align-items:center;gap:9px;padding:1.6rem 1.3rem;text-decoration:none;border-bottom:1px solid var(--bd);}
+.logo i{width:20px;height:20px;color:var(--p);filter:drop-shadow(0 0 8px var(--p));}
+.logo-t{background:linear-gradient(110deg,#fff 20%,var(--p));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.nscroll{flex:1;overflow-y:auto;padding:.7rem .65rem 1rem;}
+.nscroll::-webkit-scrollbar{width:2px;}
+.nl{font-size:.59rem;font-weight:700;text-transform:uppercase;letter-spacing:.13em;color:var(--dim);padding:.8rem 12px .3rem;user-select:none;}
+.ni{display:flex;align-items:center;gap:9px;padding:9px 11px;text-decoration:none;color:var(--mu);
+  font-size:.84rem;font-weight:500;border-radius:9px;margin-bottom:1px;transition:all .15s;position:relative;}
+.ni i{width:15px;height:15px;flex-shrink:0;}
+.ni:hover{background:rgba(129,140,248,.08);color:var(--txt);}
+.ni.active{background:rgba(129,140,248,.13);color:var(--p);}
+.ni.active::before{content:'';position:absolute;left:0;top:20%;bottom:20%;width:3px;background:var(--p);border-radius:0 3px 3px 0;box-shadow:0 0 8px var(--p);}
+.chip{margin-left:auto;background:rgba(129,140,248,.15);color:var(--p);font-size:.58rem;font-weight:700;padding:2px 6px;border-radius:20px;}
+.uc{margin-left:auto;background:var(--re);color:#fff;font-size:.58rem;font-weight:800;padding:2px 7px;border-radius:20px;}
+.ham{display:none;position:fixed;top:13px;left:13px;z-index:200;width:40px;height:40px;
+  border-radius:10px;background:rgba(10,12,22,.95);border:1px solid var(--bd);
+  color:var(--txt);align-items:center;justify-content:center;cursor:pointer;box-shadow:0 2px 16px rgba(0,0,0,.5);}
+.ham i{width:18px;height:18px;}
+.nov{display:none;position:fixed;inset:0;z-index:99;background:rgba(0,0,0,.6);backdrop-filter:blur(4px);}
+.nov.open{display:block;}
+
+/* MAIN */
+main{margin-left:248px;overflow-y:auto;height:100vh;width:calc(100% - 248px);position:relative;z-index:1;}
+main::-webkit-scrollbar{width:4px;}
+main::-webkit-scrollbar-thumb{background:rgba(255,255,255,.07);border-radius:4px;}
+
+/* HERO BANNER */
+.hero{position:relative;overflow:hidden;padding:2.4rem 2rem 0;
+  background:linear-gradient(160deg,rgba(79,70,229,.1) 0%,transparent 60%);
+  border-bottom:1px solid var(--bd);}
+.hero-grid{position:absolute;inset:0;pointer-events:none;
+  background-image:linear-gradient(rgba(129,140,248,.04) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(129,140,248,.04) 1px,transparent 1px);
+  background-size:36px 36px;}
+.hero-body{display:flex;align-items:flex-end;gap:1.5rem;position:relative;z-index:1;}
+
+/* Avatar */
+.av-wrap{position:relative;flex-shrink:0;margin-bottom:-32px;}
+.av-ring{width:96px;height:96px;border-radius:50%;padding:3px;
+  background:linear-gradient(135deg,var(--pd),#7c3aed);
+  box-shadow:0 0 28px rgba(79,70,229,.5);}
+.av-ring.vip{background:linear-gradient(135deg,#b45309,#fbbf24,#b45309);box-shadow:0 0 28px rgba(251,191,36,.4);}
+.av-inner{width:100%;height:100%;border-radius:50%;background:var(--sb);overflow:hidden;
+  display:flex;align-items:center;justify-content:center;
+  font-family:'Syne',sans-serif;font-size:2.2rem;font-weight:800;color:var(--p);}
+.av-inner img{width:100%;height:100%;object-fit:cover;}
+.av-online{position:absolute;bottom:5px;right:5px;width:14px;height:14px;border-radius:50%;
+  background:var(--g);border:2px solid var(--bg);box-shadow:0 0 8px var(--g);animation:glow 2s infinite;}
+@keyframes glow{0%,100%{box-shadow:0 0 6px var(--g)}50%{box-shadow:0 0 14px var(--g)}}
+
+/* Hero info */
+.hero-info{padding-bottom:.7rem;flex:1;min-width:0;}
+.hero-name{font-family:'Syne',sans-serif;font-size:1.6rem;font-weight:800;letter-spacing:-.03em;line-height:1.15;}
+.hero-handle{font-size:.8rem;color:var(--mu);margin-top:.15rem;}
+.hero-bio{font-size:.82rem;color:rgba(238,240,255,.65);margin-top:.4rem;max-width:420px;line-height:1.55;
+  display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
+.hero-badges{display:flex;gap:6px;margin-top:.65rem;flex-wrap:wrap;}
+.hbadge{font-size:.63rem;font-weight:700;padding:3px 9px;border-radius:20px;display:flex;align-items:center;gap:4px;}
+.hbadge i{width:9px;height:9px;}
+.hb-online{background:rgba(52,211,153,.1);color:var(--g);border:1px solid rgba(52,211,153,.2);}
+.hb-dot{width:5px;height:5px;border-radius:50%;background:var(--g);animation:pulse 2s infinite;}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+.hb-free{background:rgba(255,255,255,.06);color:var(--mu);border:1px solid var(--cb);}
+.hb-vip{background:rgba(251,191,36,.12);color:var(--am);border:1px solid rgba(251,191,36,.25);}
+.hb-streak{background:rgba(248,113,113,.1);color:var(--re);border:1px solid rgba(248,113,113,.2);}
+
+.hero-actions{display:flex;gap:.55rem;padding-bottom:.7rem;flex-shrink:0;}
+.hact{display:flex;align-items:center;gap:6px;padding:7px 14px;border-radius:10px;
+  font-family:'DM Sans',sans-serif;font-size:.78rem;font-weight:600;cursor:pointer;border:none;transition:all .18s;}
+.hact i{width:13px;height:13px;}
+.hact.edit{background:rgba(255,255,255,.06);border:1px solid var(--cb);color:var(--mu);}
+.hact.edit:hover{background:rgba(255,255,255,.1);color:var(--txt);}
+.hact.out{background:rgba(248,113,113,.08);border:1px solid rgba(248,113,113,.18);color:var(--re);}
+.hact.out:hover{background:rgba(248,113,113,.14);}
+
+/* XP Bar */
+.xp-bar-wrap{position:relative;z-index:1;padding:.85rem 2rem;border-bottom:1px solid var(--bd);
+  background:rgba(7,9,15,.5);display:flex;align-items:center;gap:1.2rem;flex-wrap:wrap;}
+.xp-level{font-family:'Syne',sans-serif;font-size:1.1rem;font-weight:800;color:var(--p);white-space:nowrap;}
+.xp-bar-outer{flex:1;min-width:120px;height:8px;border-radius:8px;background:rgba(255,255,255,.06);overflow:hidden;position:relative;}
+.xp-bar-fill{height:100%;border-radius:8px;background:linear-gradient(90deg,var(--pd),var(--p));
+  transition:width 1.2s cubic-bezier(.25,.46,.45,.94);position:relative;}
+.xp-bar-fill::after{content:'';position:absolute;inset:0;background:linear-gradient(90deg,transparent,rgba(255,255,255,.3),transparent);
+  animation:shine 2.5s ease-in-out infinite;}
+@keyframes shine{0%{transform:translateX(-100%)}100%{transform:translateX(100%)}}
+.xp-info{font-size:.72rem;color:var(--mu);white-space:nowrap;}
+.xp-info span{color:var(--p);font-weight:700;}
+
+/* TABS */
+.tabs{display:flex;gap:0;border-bottom:1px solid var(--bd);background:rgba(7,9,15,.7);backdrop-filter:blur(20px);
+  position:sticky;top:0;z-index:10;}
+.tab{padding:.72rem 1.3rem;font-family:'Syne',sans-serif;font-size:.75rem;font-weight:700;
+  color:var(--mu);cursor:pointer;border:none;background:transparent;border-bottom:2px solid transparent;
+  transition:all .18s;display:flex;align-items:center;gap:5px;white-space:nowrap;}
+.tab i{width:12px;height:12px;}
+.tab:hover{color:var(--txt);}
+.tab.active{color:var(--p);border-bottom-color:var(--p);}
+
+/* CONTENT */
+.content{padding:1.5rem 2rem 3rem;}
+.tab-panel{display:none;}
+.tab-panel.on{display:block;animation:fadeUp .2s ease;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+
+/* TWO-COL GRID */
+.two-col{display:grid;grid-template-columns:260px 1fr;gap:1.2rem;}
+
+/* CARDS */
+.card{background:var(--card);border:1px solid var(--cb);border-radius:18px;padding:1.3rem;margin-bottom:1rem;}
+.card:last-child{margin-bottom:0;}
+.card-hd{font-family:'Syne',sans-serif;font-size:.72rem;font-weight:700;color:var(--mu);
+  text-transform:uppercase;letter-spacing:.09em;margin-bottom:.9rem;display:flex;align-items:center;gap:.4rem;}
+.card-hd i{width:11px;height:11px;}
+
+/* STATS GRID */
+.stats-grid{display:grid;grid-template-columns:1fr 1fr;gap:.6rem;}
+.stat-box{background:rgba(255,255,255,.03);border:1px solid var(--cb);border-radius:13px;padding:.95rem;text-align:center;transition:border-color .18s;}
+.stat-box:hover{border-color:rgba(129,140,248,.2);}
+.stat-val{font-family:'Syne',sans-serif;font-size:1.5rem;font-weight:800;line-height:1;}
+.stat-lbl{font-size:.62rem;color:var(--mu);margin-top:4px;text-transform:uppercase;letter-spacing:.07em;}
+
+/* INFO ROWS */
+.irow{display:flex;align-items:center;gap:9px;padding:.55rem 0;border-bottom:1px solid rgba(255,255,255,.04);}
+.irow:last-child{border-bottom:none;}
+.iico{width:28px;height:28px;border-radius:8px;background:rgba(129,140,248,.1);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.iico i{width:13px;height:13px;color:var(--p);}
+.ilbl{font-size:.68rem;color:var(--mu);}
+.ival{font-size:.8rem;font-weight:600;}
+
+/* ACHIEVEMENTS */
+.ach-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(88px,1fr));gap:.7rem;}
+.ach-item{background:rgba(255,255,255,.03);border:1px solid var(--cb);border-radius:14px;padding:.85rem .5rem;
+  text-align:center;transition:all .18s;cursor:default;position:relative;}
+.ach-item.earned{border-color:rgba(129,140,248,.25);background:rgba(129,140,248,.06);}
+.ach-item.earned:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(79,70,229,.18);}
+.ach-item.locked{opacity:.35;filter:grayscale(.8);}
+.ach-ico{font-size:1.5rem;margin-bottom:.35rem;display:block;}
+.ach-name{font-size:.62rem;font-weight:700;color:var(--mu);line-height:1.3;}
+.ach-item.earned .ach-name{color:var(--p);}
+.ach-new{position:absolute;top:-4px;right:-4px;background:var(--g);color:#000;font-size:.5rem;font-weight:800;
+  padding:2px 5px;border-radius:20px;}
+
+/* HEATMAP */
+.heatmap{display:flex;flex-direction:column;gap:3px;}
+.heatmap-row{display:flex;gap:3px;}
+.heatmap-cell{width:12px;height:12px;border-radius:3px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.04);transition:all .15s;cursor:pointer;flex-shrink:0;}
+.heatmap-cell:hover{transform:scale(1.3);}
+.hm-1{background:rgba(129,140,248,.2);border-color:rgba(129,140,248,.2);}
+.hm-2{background:rgba(129,140,248,.4);border-color:rgba(129,140,248,.35);}
+.hm-3{background:rgba(129,140,248,.65);border-color:rgba(129,140,248,.5);}
+.hm-4{background:rgba(129,140,248,.9);border-color:rgba(129,140,248,.8);}
+.hm-legend{display:flex;align-items:center;gap:4px;margin-top:.5rem;font-size:.6rem;color:var(--mu);}
+.hm-legend span{width:10px;height:10px;border-radius:2px;display:inline-block;}
+
+/* FILES */
+.file-list{display:flex;flex-direction:column;gap:.55rem;}
+.file-item{display:flex;align-items:center;gap:11px;padding:.8rem 1rem;
+  background:rgba(255,255,255,.03);border:1px solid var(--cb);border-radius:14px;
+  transition:all .18s;animation:fadeUp .3s ease both;}
+.file-item:hover{border-color:rgba(129,140,248,.2);background:rgba(129,140,248,.04);}
+.fext{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;
+  font-family:'Syne',sans-serif;font-size:.6rem;font-weight:800;flex-shrink:0;}
+.fext.pdf{background:rgba(248,113,113,.12);color:var(--re);border:1px solid rgba(248,113,113,.2);}
+.fext.doc{background:rgba(129,140,248,.12);color:var(--p);border:1px solid rgba(129,140,248,.2);}
+.fext.img{background:rgba(52,211,153,.12);color:var(--g);border:1px solid rgba(52,211,153,.2);}
+.fext.oth{background:rgba(255,255,255,.05);color:var(--mu);border:1px solid var(--cb);}
+.finfo{flex:1;min-width:0;}
+.fname{font-size:.83rem;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.fmeta{font-size:.7rem;color:var(--mu);margin-top:2px;}
+.flink{width:30px;height:30px;border-radius:8px;background:rgba(129,140,248,.08);
+  border:1px solid rgba(129,140,248,.15);display:flex;align-items:center;justify-content:center;
+  color:var(--p);transition:background .18s;text-decoration:none;flex-shrink:0;}
+.flink:hover{background:rgba(129,140,248,.18);}
+.flink i{width:13px;height:13px;}
+
+/* ACTIVITY */
+.act-list{display:flex;flex-direction:column;gap:.5rem;}
+.act-item{display:flex;align-items:center;gap:10px;padding:.7rem .9rem;
+  border-radius:12px;background:rgba(255,255,255,.03);border:1px solid var(--cb);animation:fadeUp .3s ease both;}
+.aico{width:30px;height:30px;border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.aico i{width:13px;height:13px;}
+.aico.upload{background:rgba(129,140,248,.12);color:var(--p);}
+.aico.msg{background:rgba(52,211,153,.12);color:var(--g);}
+.aico.join{background:rgba(251,191,36,.12);color:var(--am);}
+.aico.streak{background:rgba(248,113,113,.12);color:var(--re);}
+.atxt{font-size:.8rem;color:var(--mu);flex:1;}
+.atxt strong{color:var(--txt);font-weight:600;}
+.atime{font-size:.67rem;color:var(--dim);}
+
+/* PREMIUM CTA */
+.prem-cta{background:linear-gradient(135deg,rgba(251,191,36,.08),rgba(251,191,36,.03));
+  border:1px solid rgba(251,191,36,.22);border-radius:16px;padding:1.1rem;display:flex;flex-direction:column;gap:.7rem;}
+.prem-cta.owned{background:linear-gradient(135deg,rgba(251,191,36,.1),rgba(251,191,36,.04));}
+.pc-hd{display:flex;align-items:center;gap:8px;}
+.pc-hd i{width:16px;height:16px;color:var(--am);}
+.pc-title{font-family:'Syne',sans-serif;font-size:.85rem;font-weight:700;}
+.pc-sub{font-size:.75rem;color:var(--mu);line-height:1.5;}
+.pc-btn{display:flex;align-items:center;justify-content:center;gap:6px;padding:8px 14px;border-radius:10px;border:none;
+  background:linear-gradient(135deg,#b45309,#d97706,#fbbf24);color:#000;
+  font-family:'Syne',sans-serif;font-size:.78rem;font-weight:800;cursor:pointer;text-decoration:none;
+  transition:all .18s;box-shadow:0 3px 14px rgba(251,191,36,.25);}
+.pc-btn i{width:12px;height:12px;}
+.pc-btn:hover{transform:translateY(-1px);box-shadow:0 6px 20px rgba(251,191,36,.35);}
+
+/* EMPTY */
+.empty{text-align:center;padding:2.5rem 1rem;color:var(--mu);font-size:.85rem;}
+.empty i{width:28px;height:28px;margin:0 auto .6rem;display:block;opacity:.2;}
+
+/* TOAST */
+.toast{position:fixed;bottom:1.5rem;left:50%;transform:translateX(-50%);z-index:500;
+  background:#0f1120;border:1px solid rgba(52,211,153,.3);color:var(--g);
+  padding:.5rem 1.1rem;border-radius:11px;font-size:.8rem;font-weight:600;display:none;
+  animation:tIn .2s ease;box-shadow:0 8px 30px rgba(0,0,0,.4);white-space:nowrap;}
+@keyframes tIn{from{opacity:0;transform:translateX(-50%) translateY(8px)}to{opacity:1;transform:translateX(-50%) translateY(0)}}
+
+/* RESPONSIVE */
+@media(max-width:1024px){nav{width:220px;}main{margin-left:220px;width:calc(100% - 220px);}.two-col{grid-template-columns:220px 1fr;}}
+@media(max-width:900px){.two-col{grid-template-columns:1fr;}}
+@media(max-width:768px){
+  .ham{display:flex;}nav{transform:translateX(-100%);box-shadow:4px 0 40px rgba(0,0,0,.6);}
+  nav.open{transform:translateX(0);}main{margin-left:0;width:100%;}
+  .hero{padding:3.5rem 1.2rem 0;}
+  .hero-body{flex-wrap:wrap;gap:.8rem;}
+  .hero-actions{width:100%;}
+  .xp-bar-wrap{padding:.7rem 1.2rem;}
+  .content{padding:1.2rem 1rem 2rem;}
+  .stats-grid{grid-template-columns:repeat(4,1fr);}
+  .ach-grid{grid-template-columns:repeat(auto-fill,minmax(76px,1fr));}
+}
+@media(max-width:480px){
+  .stats-grid{grid-template-columns:1fr 1fr;}
+  .hero-name{font-size:1.3rem;}
+  .tab{padding:.65rem .9rem;font-size:.7rem;}
+  .tab i{display:none;}
+}
+</style>
+</head>
+<body>
+<button class="ham" id="ham"><i data-lucide="menu"></i></button>
+<div class="nov" id="nov"></div>
+
+<nav id="sidebar">
+  <a href="index.html" class="logo"><i data-lucide="zap"></i><span class="logo-t">StudyFlow</span></a>
+  <div class="nscroll">
+    <div class="nl">Main</div>
+    <a href="index.html"     class="ni"><i data-lucide="layout-dashboard"></i>Dashboard</a>
+    <a href="resources.html" class="ni"><i data-lucide="book-open"></i>Resources</a>
+    <a href="upload.html"    class="ni"><i data-lucide="upload"></i>Upload</a>
+    <a href="community.html" class="ni"><i data-lucide="users"></i>Community</a>
+    <div class="nl">Connect</div>
+    <a href="chat.html"      class="ni"><i data-lucide="message-circle"></i>Group Chat</a>
+    <a href="dm.html"        class="ni"><i data-lucide="message-square"></i>Messages<span class="uc" id="navUnread" style="display:none">0</span></a>
+    <a href="assistant.html" class="ni"><i data-lucide="bot"></i>AI Assistant<span class="chip">AI</span></a>
+    <div class="nl">Account</div>
+    <a href="profile.html"   class="ni active"><i data-lucide="user"></i>My Profile</a>
+    <a href="premium.html"   class="ni"><i data-lucide="crown"></i>Go Premium<span class="chip">✨</span></a>
+    <a href="settings.html"  class="ni"><i data-lucide="settings"></i>Settings</a>
+    <div class="nl">Help</div>
+    <a href="faq.html"       class="ni"><i data-lucide="help-circle"></i>FAQ</a>
+    <a href="terms.html"     class="ni"><i data-lucide="file-text"></i>Terms</a>
+  </div>
+</nav>
+
+<main>
+  <!-- HERO -->
+  <div class="hero">
+    <div class="hero-grid"></div>
+    <div class="hero-body">
+      <div class="av-wrap">
+        <div class="av-ring" id="avRing">
+          <div class="av-inner" id="avInner">?</div>
+        </div>
+        <div class="av-online"></div>
+      </div>
+      <div class="hero-info">
+        <div class="hero-name" id="heroName">Loading…</div>
+        <div class="hero-handle" id="heroHandle">@—</div>
+        <div class="hero-bio" id="heroBio" style="display:none;"></div>
+        <div class="hero-badges">
+          <span class="hbadge hb-online"><span class="hb-dot"></span>Online</span>
+          <span class="hbadge hb-free" id="planBadge">Free Plan</span>
+          <span class="hbadge hb-streak" id="streakBadge" style="display:none">🔥 0 day streak</span>
+        </div>
+      </div>
+      <div class="hero-actions">
+        <button class="hact edit" onclick="location.href='settings.html'"><i data-lucide="settings-2"></i>Edit Profile</button>
+        <button class="hact out" id="signOutBtn"><i data-lucide="log-out"></i>Sign Out</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- XP BAR -->
+  <div class="xp-bar-wrap">
+    <div class="xp-level" id="xpLevel">Lv 1</div>
+    <div class="xp-bar-outer"><div class="xp-bar-fill" id="xpFill" style="width:0%"></div></div>
+    <div class="xp-info" id="xpInfo"><span>0</span> / 100 XP</div>
+  </div>
+
+  <!-- TABS -->
+  <div class="tabs">
+    <button class="tab active" data-t="overview"><i data-lucide="layout-dashboard"></i>Overview</button>
+    <button class="tab" data-t="files"><i data-lucide="folder"></i>My Files</button>
+    <button class="tab" data-t="achievements"><i data-lucide="award"></i>Achievements</button>
+    <button class="tab" data-t="activity"><i data-lucide="activity"></i>Activity</button>
+  </div>
+
+  <!-- CONTENT -->
+  <div class="content">
+
+    <!-- OVERVIEW TAB -->
+    <div class="tab-panel on" id="tab-overview">
+      <div class="two-col">
+        <div>
+          <!-- Account Info -->
+          <div class="card">
+            <div class="card-hd"><i data-lucide="user"></i>Account Info</div>
+            <div class="irow"><div class="iico"><i data-lucide="user"></i></div><div><div class="ilbl">Display Name</div><div class="ival" id="iName">—</div></div></div>
+            <div class="irow"><div class="iico"><i data-lucide="mail"></i></div><div><div class="ilbl">Email</div><div class="ival" id="iEmail">—</div></div></div>
+            <div class="irow"><div class="iico"><i data-lucide="shield"></i></div><div><div class="ilbl">Account Type</div><div class="ival" id="iType">Free</div></div></div>
+            <div class="irow" id="subRow" style="display:none"><div class="iico"><i data-lucide="calendar"></i></div><div><div class="ilbl">Premium Until</div><div class="ival" id="iSubEnd">—</div></div></div>
+            <div class="irow"><div class="iico"><i data-lucide="clock"></i></div><div><div class="ilbl">Member Since</div><div class="ival" id="iJoined">—</div></div></div>
+            <div class="irow"><div class="iico"><i data-lucide="hash"></i></div><div><div class="ilbl">Rank</div><div class="ival" id="iRank" style="color:var(--p)">#—</div></div></div>
+          </div>
+
+          <!-- Stats -->
+          <div class="card">
+            <div class="card-hd"><i data-lucide="bar-chart-2"></i>Your Stats</div>
+            <div class="stats-grid">
+              <div class="stat-box"><div class="stat-val" id="sUploads" style="color:var(--p)">0</div><div class="stat-lbl">Uploads</div></div>
+              <div class="stat-box"><div class="stat-val" id="sMsgs" style="color:var(--g)">0</div><div class="stat-lbl">Messages</div></div>
+              <div class="stat-box"><div class="stat-val" id="sStreak" style="color:var(--re)">0🔥</div><div class="stat-lbl">Streak</div></div>
+              <div class="stat-box"><div class="stat-val" id="sXP" style="color:var(--am)">0</div><div class="stat-lbl">Total XP</div></div>
+            </div>
+          </div>
+
+          <!-- Premium -->
+          <div id="premBlock"></div>
+        </div>
+
+        <div>
+          <!-- Study Heatmap -->
+          <div class="card">
+            <div class="card-hd"><i data-lucide="flame"></i>Study Activity — Last 35 Days</div>
+            <div id="heatmapWrap"></div>
+            <div class="hm-legend">
+              Less <span style="background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.06)"></span>
+              <span class="hm-1"></span><span class="hm-2"></span><span class="hm-3"></span><span class="hm-4"></span> More
+            </div>
+          </div>
+
+          <!-- Recent Files preview -->
+          <div class="card">
+            <div class="card-hd" style="justify-content:space-between;margin-bottom:.7rem;">
+              <span><i data-lucide="folder-open" style="width:11px;height:11px;margin-right:.3rem;"></i>Recent Files</span>
+              <span id="fileCountOverview" style="font-size:.68rem;color:var(--mu);">0 files</span>
+            </div>
+            <div class="file-list" id="recentFiles"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- FILES TAB -->
+    <div class="tab-panel" id="tab-files">
+      <div class="card">
+        <div class="card-hd" style="justify-content:space-between;margin-bottom:.8rem;">
+          <span><i data-lucide="folder-open" style="width:11px;height:11px;margin-right:.3rem;"></i>My Uploaded Files</span>
+          <span id="fileCountAll" style="font-size:.72rem;color:var(--p);font-weight:700;">0 files</span>
+        </div>
+        <div class="file-list" id="allFiles"><div class="empty"><i data-lucide="upload-cloud"></i>Loading…</div></div>
+      </div>
+    </div>
+
+    <!-- ACHIEVEMENTS TAB -->
+    <div class="tab-panel" id="tab-achievements">
+      <div class="card">
+        <div class="card-hd"><i data-lucide="award"></i>Achievements</div>
+        <div class="ach-grid" id="achGrid"></div>
+      </div>
+    </div>
+
+    <!-- ACTIVITY TAB -->
+    <div class="tab-panel" id="tab-activity">
+      <div class="card">
+        <div class="card-hd"><i data-lucide="activity"></i>Recent Activity</div>
+        <div class="act-list" id="actList"><div class="empty"><i data-lucide="clock"></i>Loading…</div></div>
+      </div>
+    </div>
+
+  </div>
+</main>
+
+<div class="toast" id="toast"></div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+import {
+  getFirestore, doc, getDoc, collection, query, where,
+  onSnapshot, getDocs, orderBy, limit
+} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+const FB={apiKey:"AIzaSyA-4YyVROZz-OIAGTWhpMMpuJe2Xag9Fig",authDomain:"vibe-jolt.firebaseapp.com",projectId:"vibe-jolt",storageBucket:"vibe-jolt.appspot.com",messagingSenderId:"386156754842",appId:"1:386156754842:web:8b5e45a3c7f20ac9616c23"};
+const app=initializeApp(FB);
+const auth=getAuth(app);
+const db=getFirestore(app);
+const G=id=>document.getElementById(id);
+
+// XP calculation
+function calcXP(d){
+  return (d.messagesSent||0)*5 + (d.uploads||0)*20 + (d.streak||0)*10;
+}
+function calcLevel(xp){
+  // Level thresholds: 100, 250, 500, 900, 1400, 2100, ...
+  const thresholds=[0,100,250,500,900,1400,2100,3000,4200,5800,8000];
+  let lv=1;
+  for(let i=1;i<thresholds.length;i++){if(xp>=thresholds[i])lv=i+1;else break;}
+  const curr=thresholds[Math.min(lv-1,thresholds.length-1)];
+  const next=thresholds[Math.min(lv,thresholds.length-1)];
+  const pct=next>curr?Math.round(((xp-curr)/(next-curr))*100):100;
+  return{lv,xp,curr,next,pct};
+}
+
+// TABS
+document.querySelectorAll(".tab").forEach(t=>t.addEventListener("click",()=>{
+  document.querySelectorAll(".tab").forEach(x=>x.classList.remove("active"));
+  document.querySelectorAll(".tab-panel").forEach(x=>x.classList.remove("on"));
+  t.classList.add("active");
+  G("tab-"+t.dataset.t).classList.add("on");
+}));
+
+// SIGN OUT
+G("signOutBtn").onclick=()=>{if(confirm("Sign out of StudyFlow?"))signOut(auth).then(()=>location.href="auth.html");};
+
+// AUTH
+onAuthStateChanged(auth,async user=>{
+  if(!user){location.href="auth.html";return;}
+  const name=user.displayName||user.email.split("@")[0];
+  const handle="@"+user.email.split("@")[0].toLowerCase().replace(/\s/g,"");
+
+  G("heroName").textContent=name;
+  G("heroHandle").textContent=handle;
+  G("iName").textContent=name;
+  G("iEmail").textContent=user.email;
+
+  if(user.photoURL){
+    G("avInner").innerHTML=`<img src="${user.photoURL}" alt="${esc(name)}">`;
+  } else {
+    G("avInner").textContent=name[0].toUpperCase();
+  }
+
+  if(user.metadata?.creationTime){
+    const d=new Date(user.metadata.creationTime);
+    G("iJoined").textContent=d.toLocaleDateString("en-US",{month:"short",year:"numeric"});
+  }
+
+  // Firestore
+  try{
+    const snap=await getDoc(doc(db,"users",user.uid));
+    const d=snap.data()||{};
+    const isPrem=d.isPremium===true&&(d.subscriptionEnd?.toMillis?.()??0)>Date.now();
+    const msgs=d.messagesSent||0;
+    const uploads=d.uploads||0;
+    const streak=d.streak||0;
+    const xp=calcXP(d);
+    const {lv,pct,next,curr}=calcLevel(xp);
+
+    // Hero
+    if(d.bio){G("heroBio").textContent=d.bio;G("heroBio").style.display="";}
+    if(streak>0){G("streakBadge").textContent=`🔥 ${streak} day streak`;G("streakBadge").style.display="";}
+
+    // Stats
+    G("sUploads").textContent=uploads.toLocaleString();
+    G("sMsgs").textContent=msgs.toLocaleString();
+    G("sStreak").textContent=streak+"🔥";
+    G("sXP").textContent=xp.toLocaleString();
+
+    // XP bar
+    G("xpLevel").textContent=`Lv ${lv}`;
+    setTimeout(()=>{G("xpFill").style.width=pct+"%";},200);
+    G("xpInfo").innerHTML=`<span>${xp.toLocaleString()}</span> XP · Next level at ${next}`;
+
+    // Account type
+    if(isPrem){
+      G("avRing").classList.add("vip");
+      G("planBadge").textContent="👑 VIP Premium";G("planBadge").className="hbadge hb-vip";
+      G("iType").textContent="👑 Premium";
+      const se=d.subscriptionEnd?.toDate?.();
+      if(se){G("subRow").style.display="";G("iSubEnd").textContent=se.toLocaleDateString("en-US",{month:"long",day:"numeric",year:"numeric"});}
+      G("premBlock").innerHTML=`<div class="prem-cta owned"><div class="pc-hd"><i data-lucide="crown"></i><div class="pc-title">VIP Member</div></div><div class="pc-sub">Thanks for supporting StudyFlow! You have full access to all features.</div></div>`;
+    } else {
+      G("premBlock").innerHTML=`<div class="prem-cta"><div class="pc-hd"><i data-lucide="crown"></i><div class="pc-title">Go Premium</div></div><div class="pc-sub">Unlock unlimited AI, uploads, VIP badge &amp; more.</div><a href="premium.html" class="pc-btn"><i data-lucide="zap"></i>Upgrade Now</a></div>`;
+    }
+    lucide.createIcons();
+
+    // Rank
+    try{
+      const allU=await getDocs(collection(db,"users"));
+      const myScore=xp;let rank=1;
+      allU.forEach(u=>{if(u.id===user.uid)return;const ud=u.data();if(calcXP(ud)>myScore)rank++;});
+      G("iRank").textContent="#"+rank;
+    }catch(e){}
+
+    // Achievements
+    buildAchievements({msgs,uploads,streak,xp,isPrem,lv});
+
+    // Heatmap (mock from messagesSent spread over last 35 days)
+    buildHeatmap(msgs,uploads);
+
+  }catch(e){console.error(e);}
+
+  // FILES
+  await loadFiles(user);
+  await buildActivity(user,name);
+
+  // DM unread
+  try{
+    onSnapshot(query(collection(db,"dms"),where("participants","array-contains",user.uid)),snap=>{
+      let t=0;snap.forEach(d=>t+=(d.data()[`unread_${user.uid}`]||0));
+      const c=G("navUnread");if(t>0){c.textContent=t>9?"9+":t;c.style.display="";}else c.style.display="none";
+    });
+  }catch(e){}
+});
+
+async function loadFiles(user){
+  const queries=[
+    query(collection(db,"materials"),where("uid","==",user.uid)),
+    query(collection(db,"materials"),where("userId","==",user.uid)),
+    query(collection(db,"materials"),where("uploadedBy","==",user.uid)),
+  ];
+  let snap=await getDocs(queries[0]);
+  if(snap.empty)snap=await getDocs(queries[1]);
+  if(snap.empty)snap=await getDocs(queries[2]);
+
+  const docs=[];snap.forEach(d=>docs.push({id:d.id,...d.data()}));
+  docs.sort((a,b)=>(b.createdAt?.toMillis?.()??0)-(a.createdAt?.toMillis?.()??0));
+
+  const total=docs.length;
+  G("fileCountOverview").textContent=total+" file"+(total!==1?"s":"");
+  G("fileCountAll").textContent=total+" file"+(total!==1?"s":"");
+
+  renderFiles(docs.slice(0,3),G("recentFiles"),true);
+  renderFiles(docs,G("allFiles"),false);
+}
+
+function renderFiles(docs,container,isPreview){
+  if(!docs.length){
+    container.innerHTML=`<div class="empty"><i data-lucide="upload-cloud"></i>${isPreview?"No files yet.":"<a href='upload.html' style='color:var(--p)'>Upload your first file →</a>"}</div>`;
+    lucide.createIcons();return;
+  }
+  container.innerHTML="";
+  docs.forEach((f,i)=>{
+    const ext=(f.name||f.fileName||"file").split(".").pop().toLowerCase();
+    const name=f.name||f.fileName||"Untitled File";
+    const date=f.createdAt?.toDate?.()?.toLocaleDateString("en-US",{month:"short",day:"numeric",year:"numeric"})||"Recently";
+    const size=f.size?fmtSize(f.size):"";
+    let ec="oth",el=ext.toUpperCase().slice(0,4);
+    if(ext==="pdf")ec="pdf";else if(["doc","docx","txt","md"].includes(ext))ec="doc";else if(["png","jpg","jpeg","gif","webp"].includes(ext))ec="img";
+    const item=document.createElement("div");item.className="file-item";item.style.animationDelay=(i*.04)+"s";
+    item.innerHTML=`<div class="fext ${ec}">${el}</div><div class="finfo"><div class="fname">${esc(name)}</div><div class="fmeta">${date}${size?" · "+size:""}</div></div>${f.url?`<a href="${f.url}" target="_blank" class="flink"><i data-lucide="external-link"></i></a>`:""}`;
+    container.appendChild(item);
+  });
+  lucide.createIcons();
+}
+
+function buildAchievements({msgs,uploads,streak,xp,isPrem,lv}){
+  const all=[
+    {ico:"📤",name:"First Upload",desc:"Upload 1 file",earned:uploads>=1},
+    {ico:"✉️",name:"First Message",desc:"Send 1 message",earned:msgs>=1,isNew:msgs===1},
+    {ico:"🔥",name:"On Fire",desc:"3-day streak",earned:streak>=3},
+    {ico:"📚",name:"Study Nerd",desc:"50 messages sent",earned:msgs>=50},
+    {ico:"🚀",name:"Rocket",desc:"Reach Level 5",earned:lv>=5},
+    {ico:"👑",name:"VIP",desc:"Get Premium",earned:isPrem},
+    {ico:"💯",name:"100 Club",desc:"100 messages",earned:msgs>=100},
+    {ico:"⭐",name:"Star Student",desc:"500 XP earned",earned:xp>=500},
+    {ico:"🏆",name:"Champion",desc:"1000 XP earned",earned:xp>=1000},
+    {ico:"📁",name:"Curator",desc:"5 files uploaded",earned:uploads>=5},
+    {ico:"⚡",name:"Speedster",desc:"10 messages in a day",earned:msgs>=10},
+    {ico:"🌟",name:"Legend",desc:"Reach Level 10",earned:lv>=10},
+  ];
+  const grid=G("achGrid");grid.innerHTML="";
+  all.forEach(a=>{
+    const el=document.createElement("div");
+    el.className="ach-item "+(a.earned?"earned":"locked");
+    el.title=a.desc;
+    el.innerHTML=`${a.isNew&&a.earned?`<div class="ach-new">NEW</div>`:""}<span class="ach-ico">${a.ico}</span><div class="ach-name">${a.name}</div>`;
+    grid.appendChild(el);
+  });
+}
+
+function buildHeatmap(msgs,uploads){
+  // Build 5 rows of 7 cells = 35 days
+  const cells=35;
+  const data=Array.from({length:cells},(_,i)=>{
+    // Simulate activity based on real stats
+    const r=Math.random();
+    const activity=Math.floor(r*r*(msgs+uploads+1)/3);
+    return Math.min(activity,4);
+  });
+  // Ensure cells reflect real counts somewhat
+  const totalActivity=msgs+uploads;
+  let placed=0;
+  data.forEach((_,i)=>{if(placed<totalActivity&&Math.random()>.5){data[i]=Math.min(4,Math.floor(Math.random()*4)+1);placed++;}});
+
+  const wrap=G("heatmapWrap");
+  wrap.innerHTML="";
+  const rows=5;
+  for(let r=0;r<rows;r++){
+    const row=document.createElement("div");row.className="heatmap-row";
+    for(let c=0;c<7;c++){
+      const idx=r*7+c;
+      const el=document.createElement("div");
+      el.className="heatmap-cell"+(data[idx]?` hm-${data[idx]}`:"");
+      const daysAgo=cells-1-idx;
+      const d=new Date(Date.now()-daysAgo*86400000);
+      el.title=d.toLocaleDateString("en-US",{month:"short",day:"numeric"})+(data[idx]?` — ${data[idx]} activity`:" — No activity");
+      row.appendChild(el);
+    }
+    wrap.appendChild(row);
+  }
+}
+
+async function buildActivity(user,name){
+  const acts=[];
+  if(user.metadata?.creationTime){
+    acts.push({type:"join",text:`<strong>${esc(name)}</strong> joined StudyFlow`,time:new Date(user.metadata.creationTime)});
+  }
+  try{
+    const fSnap=await getDocs(query(collection(db,"materials"),where("uid","==",user.uid),limit(5)));
+    fSnap.forEach(d=>{const f=d.data();if(f.createdAt?.toDate)acts.push({type:"upload",text:`Uploaded <strong>${esc(f.name||"a file")}</strong>`,time:f.createdAt.toDate()});});
+  }catch(e){}
+  acts.sort((a,b)=>b.time-a.time);
+  const list=G("actList");
+  if(!acts.length){list.innerHTML=`<div class="empty"><i data-lucide="activity"></i>No activity yet.</div>`;lucide.createIcons();return;}
+  list.innerHTML="";
+  const icons={upload:"upload-cloud",join:"user-check",msg:"message-circle",streak:"flame"};
+  acts.forEach((a,i)=>{
+    const el=document.createElement("div");el.className="act-item";el.style.animationDelay=(i*.04)+"s";
+    el.innerHTML=`<div class="aico ${a.type}"><i data-lucide="${icons[a.type]||"activity"}"></i></div><div class="atxt">${a.text}</div><div class="atime">${timeAgo(a.time)}</div>`;
+    list.appendChild(el);
+  });
+  lucide.createIcons();
+}
+
+function timeAgo(d){const s=Math.floor((Date.now()-d)/1000);if(s<60)return"just now";if(s<3600)return Math.floor(s/60)+"m ago";if(s<86400)return Math.floor(s/3600)+"h ago";return Math.floor(s/86400)+"d ago";}
+function fmtSize(b){if(b<1024)return b+"B";if(b<1048576)return(b/1024).toFixed(1)+"KB";return(b/1048576).toFixed(1)+"MB";}
+function esc(s){return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");}
+function toast(msg){const t=G("toast");t.textContent=msg;t.style.display="block";clearTimeout(t._t);t._t=setTimeout(()=>t.style.display="none",2800);}
+
+lucide.createIcons();
+</script>
+
+<script>
+(()=>{
+  const ham=document.getElementById("ham"),sb=document.getElementById("sidebar"),nov=document.getElementById("nov");
+  const open=()=>{sb.classList.add("open");nov.classList.add("open");ham.innerHTML='<i data-lucide="x"></i>';lucide.createIcons();};
+  const close=()=>{sb.classList.remove("open");nov.classList.remove("open");ham.innerHTML='<i data-lucide="menu"></i>';lucide.createIcons();};
+  ham.addEventListener("click",()=>sb.classList.contains("open")?close():open());
+  nov.addEventListener("click",close);
+  document.querySelectorAll(".ni").forEach(a=>a.addEventListener("click",()=>{if(window.innerWidth<=768)close();}));
+})();
+if("serviceWorker"in navigator)navigator.serviceWorker.register("/sw.js").catch(()=>{});
+</script>
+</body>
+</html>
